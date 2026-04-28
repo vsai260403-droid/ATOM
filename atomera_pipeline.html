@@ -742,16 +742,82 @@
   .val-stock-price { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: #00d4ff; letter-spacing: 0.05em; }
   .val-stock-range { font-size: 11px; color: #94a3b8; font-family: 'DM Mono', monospace; }
 
-  /* Scenario table */
-  .scenario-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
-  .scenario-table th { font-family: 'DM Mono', monospace; font-size: 10px; color: #4b6280; text-align: left; padding: 5px 10px; border-bottom: 1px solid var(--border); }
-  .scenario-table td { padding: 7px 10px; border-bottom: 1px solid rgba(30,45,69,0.5); color: #cbd5e1; vertical-align: middle; }
-  .scenario-table tr:last-child td { border-bottom: none; }
-  .sc-name { color: #e2e8f0 !important; font-weight: 500; }
-  .sc-price { font-family: 'Bebas Neue', sans-serif !important; font-size: 17px !important; color: #00d4ff !important; letter-spacing: 0.04em; }
-  .sc-mult { font-family: 'Bebas Neue', sans-serif !important; font-size: 15px !important; color: #a78bfa !important; }
-  .sc-note { font-size: 11px !important; color: #64748b !important; font-family: 'DM Mono', monospace !important; }
-  .scenario-table tr.sc-highlight td { background: rgba(124,58,237,0.07); }
+  /* Scenario scroll cards */
+  .sc-scroll {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    overflow-x: auto;
+    padding: 16px 4px 12px;
+    margin-top: 10px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #1e2d45 transparent;
+  }
+  .sc-scroll::-webkit-scrollbar { height: 4px; }
+  .sc-scroll::-webkit-scrollbar-track { background: transparent; }
+  .sc-scroll::-webkit-scrollbar-thumb { background: #1e2d45; border-radius: 2px; }
+
+  .sc-card {
+    flex-shrink: 0;
+    width: 130px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .sc-card-base { border-color: #334155; opacity: 0.8; }
+  .sc-card-hot { border-color: #7c3aed; box-shadow: 0 0 10px rgba(124,58,237,0.2); }
+
+  .sc-step {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: #e2e8f0;
+  }
+  .sc-stage-tag {
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    line-height: 1.4;
+  }
+  .sc-mktcap {
+    font-size: 10px;
+    color: #4b6280;
+    font-family: 'DM Mono', monospace;
+    border-top: 1px solid var(--border);
+    padding-top: 6px;
+    margin-top: 2px;
+  }
+  .sc-prices {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 3px;
+  }
+  .sc-p-label { font-size: 9px; color: #4b6280; font-family: 'DM Mono', monospace; }
+  .sc-p-val { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: #00d4ff; letter-spacing: 0.03em; }
+  .sc-p-sep { font-size: 10px; color: #334155; margin: 0 1px; }
+  .sc-upside {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    color: #a78bfa;
+    letter-spacing: 0.05em;
+  }
+
+  .sc-arrow {
+    flex-shrink: 0;
+    align-self: center;
+    font-size: 18px;
+    color: #334155;
+    padding: 0 4px;
+    margin-top: -10px;
+  }
+
+  /* Scenario table (kept for reference, no longer used) */
+  .scenario-table { display: none; }
 
   /* Divider */
   .divider {
@@ -1414,91 +1480,115 @@
         </div>
         <div class="val-basis">근거: Infineon 4년·$200M 투자로 TrenchFET 25% 개선. MST는 40% 개선 → 경제성 확보.</div>
       </div>
-      <!-- Scenario Table -->
+      <!-- Scenario Cards -->
       <div class="val-item" style="grid-column: 1 / -1;">
-        <div class="val-company">📊 계약 단계별 주가 시나리오 — "계약 성사 시 주가는 얼마?" (34.4M주, 현재가 $8.60 기준 / Yahoo Finance 2026.04.28)</div>
-        <table class="scenario-table">
-          <thead>
-            <tr>
-              <th>시나리오</th>
-              <th>현재 단계</th>
-              <th>추가 시총</th>
-              <th>누적 시총</th>
-              <th>주가 (로열티 0.5%)</th>
-              <th>주가 (로열티 1%)</th>
-              <th>현재 대비</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="sc-name">현재 (기준)</td>
-              <td class="sc-note">STM·Infineon 계약 완료</td>
-              <td class="sc-note">—</td>
-              <td class="sc-note">~$295M</td>
-              <td class="sc-price">$8.60</td>
-              <td class="sc-price">$8.60</td>
-              <td class="sc-mult">1x</td>
-            </tr>
-            <tr class="sc-highlight">
-              <td class="sc-name">① 삼성 GAA 계약</td>
-              <td class="sc-note" style="color:#a78bfa">Phase 4 진행 중 ← 최근접</td>
-              <td class="sc-note">+$0.9B ~ $1.8B</td>
-              <td class="sc-note">~$1.2B</td>
-              <td class="sc-price">~$35</td>
-              <td class="sc-price">~$61</td>
-              <td class="sc-mult">4x ~ 7x</td>
-            </tr>
-            <tr>
-              <td class="sc-name">② + 인텔 GAA 계약</td>
-              <td class="sc-note" style="color:#fbbf24">대규모 평가 중</td>
-              <td class="sc-note">+$0.68B ~ $1.4B</td>
-              <td class="sc-note">~$1.9B</td>
-              <td class="sc-price">~$55</td>
-              <td class="sc-price">~$102</td>
-              <td class="sc-mult">6x ~ 12x</td>
-            </tr>
-            <tr>
-              <td class="sc-name">③ + DRAM 1개사 (Micron)</td>
-              <td class="sc-note" style="color:#fbbf24">DRAM 평가 중</td>
-              <td class="sc-note">+$7B ~ $14B (Micron 35%점유 기준)</td>
-              <td class="sc-note">~$8.9B</td>
-              <td class="sc-price">~$258</td>
-              <td class="sc-price">~$475</td>
-              <td class="sc-mult">30x ~ 55x</td>
-            </tr>
-            <tr>
-              <td class="sc-name">④ + TSMC GAA 계약</td>
-              <td class="sc-note" style="color:#60a5fa">초기 단계 ← 가장 느림</td>
-              <td class="sc-note">+$6.4B ~ $12.8B</td>
-              <td class="sc-note">~$15.3B</td>
-              <td class="sc-price">~$444</td>
-              <td class="sc-price">~$857</td>
-              <td class="sc-mult">52x ~ 100x</td>
-            </tr>
-            <tr>
-              <td class="sc-name">⑤ + DRAM 전체</td>
-              <td class="sc-note">Micron 외 삼성·SK Hynix</td>
-              <td class="sc-note">+$13B ~ $26B (삼성·SK Hynix)</td>
-              <td class="sc-note">~$28.3B</td>
-              <td class="sc-price">~$822</td>
-              <td class="sc-price">~$1,609</td>
-              <td class="sc-mult">96x ~ 187x</td>
-            </tr>
-            <tr>
-              <td class="sc-name">⑥ + Power/RF/GaN</td>
-              <td class="sc-note">Infineon 이미 상업 매출</td>
-              <td class="sc-note">+$0.4B ~ $1.2B</td>
-              <td class="sc-note">~$28.7B</td>
-              <td class="sc-price">~$834</td>
-              <td class="sc-price">~$1,644</td>
-              <td class="sc-mult">97x ~ 191x</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="val-company">📊 계약 단계별 주가 시나리오 — "계약 성사 시 주가는 얼마?" (34.4M주, 현재가 $8.60 / Yahoo Finance 2026.04.28)</div>
+        <div class="sc-scroll">
+          <!-- 현재 -->
+          <div class="sc-card sc-card-base">
+            <div class="sc-step">현재</div>
+            <div class="sc-stage-tag" style="color:#64748b">STM·Infineon 완료</div>
+            <div class="sc-mktcap">~$295M</div>
+            <div class="sc-prices">
+              <span class="sc-p-label">주가</span>
+              <span class="sc-p-val">$8.60</span>
+            </div>
+            <div class="sc-upside" style="color:#64748b">기준</div>
+          </div>
+          <div class="sc-arrow">→</div>
+          <!-- 삼성 -->
+          <div class="sc-card sc-card-hot">
+            <div class="sc-step">① 삼성 GAA</div>
+            <div class="sc-stage-tag" style="color:#a78bfa">Phase 4 ← 최근접</div>
+            <div class="sc-mktcap">누적 ~$1.2B</div>
+            <div class="sc-prices">
+              <span class="sc-p-label">0.5%</span>
+              <span class="sc-p-val">~$35</span>
+              <span class="sc-p-sep">/</span>
+              <span class="sc-p-label">1%</span>
+              <span class="sc-p-val">~$61</span>
+            </div>
+            <div class="sc-upside">4x ~ 7x</div>
+          </div>
+          <div class="sc-arrow">→</div>
+          <!-- 인텔 -->
+          <div class="sc-card">
+            <div class="sc-step">② + 인텔 GAA</div>
+            <div class="sc-stage-tag" style="color:#fbbf24">대규모 평가 중</div>
+            <div class="sc-mktcap">누적 ~$1.9B</div>
+            <div class="sc-prices">
+              <span class="sc-p-label">0.5%</span>
+              <span class="sc-p-val">~$55</span>
+              <span class="sc-p-sep">/</span>
+              <span class="sc-p-label">1%</span>
+              <span class="sc-p-val">~$102</span>
+            </div>
+            <div class="sc-upside">6x ~ 12x</div>
+          </div>
+          <div class="sc-arrow">→</div>
+          <!-- DRAM 1사 -->
+          <div class="sc-card">
+            <div class="sc-step">③ + DRAM 1사</div>
+            <div class="sc-stage-tag" style="color:#fbbf24">Micron 평가 중</div>
+            <div class="sc-mktcap">누적 ~$8.9B</div>
+            <div class="sc-prices">
+              <span class="sc-p-label">0.5%</span>
+              <span class="sc-p-val">~$258</span>
+              <span class="sc-p-sep">/</span>
+              <span class="sc-p-label">1%</span>
+              <span class="sc-p-val">~$475</span>
+            </div>
+            <div class="sc-upside">30x ~ 55x</div>
+          </div>
+          <div class="sc-arrow">→</div>
+          <!-- TSMC -->
+          <div class="sc-card">
+            <div class="sc-step">④ + TSMC GAA</div>
+            <div class="sc-stage-tag" style="color:#60a5fa">초기 단계, 가장 느림</div>
+            <div class="sc-mktcap">누적 ~$15.3B</div>
+            <div class="sc-prices">
+              <span class="sc-p-label">0.5%</span>
+              <span class="sc-p-val">~$444</span>
+              <span class="sc-p-sep">/</span>
+              <span class="sc-p-label">1%</span>
+              <span class="sc-p-val">~$857</span>
+            </div>
+            <div class="sc-upside">52x ~ 100x</div>
+          </div>
+          <div class="sc-arrow">→</div>
+          <!-- DRAM 전체 -->
+          <div class="sc-card">
+            <div class="sc-step">⑤ + DRAM 전체</div>
+            <div class="sc-stage-tag" style="color:#64748b">삼성·SK Hynix 추가</div>
+            <div class="sc-mktcap">누적 ~$28.3B</div>
+            <div class="sc-prices">
+              <span class="sc-p-label">0.5%</span>
+              <span class="sc-p-val">~$822</span>
+              <span class="sc-p-sep">/</span>
+              <span class="sc-p-label">1%</span>
+              <span class="sc-p-val">~$1,609</span>
+            </div>
+            <div class="sc-upside">96x ~ 187x</div>
+          </div>
+          <div class="sc-arrow">→</div>
+          <!-- Power/RF -->
+          <div class="sc-card">
+            <div class="sc-step">⑥ + Power/RF</div>
+            <div class="sc-stage-tag" style="color:#10b981">Infineon 상업 매출 중</div>
+            <div class="sc-mktcap">누적 ~$28.7B</div>
+            <div class="sc-prices">
+              <span class="sc-p-label">0.5%</span>
+              <span class="sc-p-val">~$834</span>
+              <span class="sc-p-sep">/</span>
+              <span class="sc-p-label">1%</span>
+              <span class="sc-p-val">~$1,644</span>
+            </div>
+            <div class="sc-upside">97x ~ 191x</div>
+          </div>
+        </div>
         <div style="font-size:11px;color:#4b6280;font-family:'DM Mono',monospace;margin-top:10px;line-height:1.8">
           ※ 순서는 현재 계약 진행 단계 기준 — 삼성(Phase 4) → 인텔(평가) → DRAM → TSMC(초기) 순<br>
-          ※ 0.5% 열: 보수적 기본 시나리오 / 1% 열: 기술 확산 시 낙관 시나리오<br>
-          ※ 주식수 34.4M주 기준 (시총 $295M ÷ $8.60, Yahoo Finance 2026.04.28) — 유상증자 발생 시 희석
+          ※ 0.5%: 보수적 시나리오 / 1%: 낙관 시나리오 / 주식수 34.4M주 기준 — 유상증자 시 희석
         </div>
       </div>
     </div>
