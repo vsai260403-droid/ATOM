@@ -726,6 +726,33 @@
   .color-blue { color: #60a5fa; }
   .color-yellow { color: #fbbf24; }
 
+  /* Stock price tag inside val-item */
+  .val-stock {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 8px 10px;
+    background: rgba(0,212,255,0.06);
+    border: 1px solid rgba(0,212,255,0.18);
+    border-radius: 6px;
+    flex-wrap: wrap;
+  }
+  .val-stock-label { font-size: 11px; color: #64748b; font-family: 'DM Mono', monospace; flex-shrink: 0; }
+  .val-stock-price { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: #00d4ff; letter-spacing: 0.05em; }
+  .val-stock-range { font-size: 11px; color: #94a3b8; font-family: 'DM Mono', monospace; }
+
+  /* Scenario table */
+  .scenario-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+  .scenario-table th { font-family: 'DM Mono', monospace; font-size: 10px; color: #4b6280; text-align: left; padding: 5px 10px; border-bottom: 1px solid var(--border); }
+  .scenario-table td { padding: 7px 10px; border-bottom: 1px solid rgba(30,45,69,0.5); color: #cbd5e1; vertical-align: middle; }
+  .scenario-table tr:last-child td { border-bottom: none; }
+  .sc-name { color: #e2e8f0 !important; font-weight: 500; }
+  .sc-price { font-family: 'Bebas Neue', sans-serif !important; font-size: 17px !important; color: #00d4ff !important; letter-spacing: 0.04em; }
+  .sc-mult { font-family: 'Bebas Neue', sans-serif !important; font-size: 15px !important; color: #a78bfa !important; }
+  .sc-note { font-size: 11px !important; color: #64748b !important; font-family: 'DM Mono', monospace !important; }
+  .scenario-table tr.sc-highlight td { background: rgba(124,58,237,0.07); }
+
   /* Divider */
   .divider {
     height: 1px;
@@ -1305,72 +1332,151 @@
     <div class="val-divider"></div>
 
     <div class="valuation-grid">
+      <!-- TSMC -->
       <div class="val-item">
         <div class="val-company">🔵 TSMC (GAA 2nm)</div>
         <div class="val-formula">
-          연매출 $160B (2026E)<br>
-          → 2nm GAA 비중 20% → <strong>$32B</strong><br>
-          → 로열티 <strong>0.5~1%</strong> → <strong>$160~320M/year</strong><br>
-          → PSR 40x 적용<br>
-          → 장기 GAA 비중 50% 기준 <strong>$400~800M/year</strong>
+          연매출 $160B × GAA비중 20% = $32B<br>
+          → 0.5% royalty × PSR 40x = <strong>$6.4B</strong><br>
+          → 1.0% royalty × PSR 40x = <strong>$12.8B</strong>
         </div>
-        <div class="val-result">현재가치 <strong>~$6.4B ~ $12.8B</strong><br><span style="font-size:0.82em;opacity:0.75">(로열티 0.5% 시 $6.4B / 1% 시 $12.8B)</span></div>
-        <div class="val-basis">근거: 2nm 웨이퍼 $30,000/장 × 로열티 0.5% = $150/장. TSMC 월 웨이퍼 생산능력 ~100K장 기준</div>
+        <div class="val-stock">
+          <span class="val-stock-label">TSMC 계약 성사 시 주가</span>
+          <span class="val-stock-price">$178 ~ $351</span>
+          <span class="val-stock-range">(37M주 기준, 현재 $5)</span>
+        </div>
+        <div class="val-basis">근거: 2nm 웨이퍼 $30,000/장 × 0.5% = $150/장. 월 생산 ~100K장 가정</div>
       </div>
+      <!-- Samsung -->
       <div class="val-item">
         <div class="val-company">🟣 Samsung 파운드리 (GAA)</div>
         <div class="val-formula">
-          파운드리 매출 ~$15B<br>
-          → GAA 비중 30% → <strong>$4.5B</strong><br>
-          → 로열티 <strong>0.5~1%</strong> → <strong>$22~45M/year</strong><br>
-          → PSR 40x 적용
+          파운드리 $15B × GAA비중 30% = $4.5B<br>
+          → 0.5% royalty × PSR 40x = <strong>$0.9B</strong><br>
+          → 1.0% royalty × PSR 40x = <strong>$1.8B</strong>
         </div>
-        <div class="val-result">현재가치 <strong>~$880M ~ $1.8B</strong><br><span style="font-size:0.82em;opacity:0.75">(로열티 0.5% 시 $880M / 1% 시 $1.8B)</span></div>
-        <div class="val-basis">근거: STM 계약 발표 시 시총 +$140M 상승 (전력 매출 $3B 기준). 삼성은 그 4~5배 규모.</div>
+        <div class="val-stock">
+          <span class="val-stock-label">삼성 계약 성사 시 주가</span>
+          <span class="val-stock-price">$24 ~ $49</span>
+          <span class="val-stock-range">(37M주 기준)</span>
+        </div>
+        <div class="val-basis">근거: STM 계약 시 시총 +$140M (전력 $3B 기준). 삼성 파운드리는 그 4~5배.</div>
       </div>
+      <!-- Intel -->
       <div class="val-item">
         <div class="val-company">🟣 Intel 파운드리 (GAA 18A)</div>
         <div class="val-formula">
-          파운드리 매출 ~$17B<br>
-          → 18A/14A GAA 비중 20% → <strong>$3.4B</strong><br>
-          → 로열티 <strong>0.5~1%</strong> → <strong>$17~34M/year</strong><br>
-          → PSR 40x 적용
+          파운드리 $17B × GAA비중 20% = $3.4B<br>
+          → 0.5% royalty × PSR 40x = <strong>$0.68B</strong><br>
+          → 1.0% royalty × PSR 40x = <strong>$1.4B</strong>
         </div>
-        <div class="val-result">현재가치 <strong>~$680M ~ $1.4B</strong><br><span style="font-size:0.82em;opacity:0.75">(로열티 0.5% 시 $680M / 1% 시 $1.4B)</span></div>
-        <div class="val-basis">근거: 18A 수율 개선 시급. MST 2배 도판트 차단 효과 → 수율 직결 → 도입 유인 매우 강함.</div>
+        <div class="val-stock">
+          <span class="val-stock-label">인텔 계약 성사 시 주가</span>
+          <span class="val-stock-price">$18 ~ $38</span>
+          <span class="val-stock-range">(37M주 기준)</span>
+        </div>
+        <div class="val-basis">근거: 18A 수율 개선 시급. MST 도판트 차단 2배 → 수율 직결 → 도입 유인 강함.</div>
       </div>
+      <!-- DRAM -->
       <div class="val-item">
-        <div class="val-company">🟢 DRAM (Micron / SK Hynix)</div>
+        <div class="val-company">🟢 DRAM (Micron / SK Hynix / 삼성)</div>
         <div class="val-formula">
-          전세계 DRAM 시장 ~$100B<br>
-          → 웨이퍼 레벨 MST 적용 시<br>
-          → 로열티 <strong>0.5~1%</strong> → <strong>$500M~$1B/year</strong><br>
-          → PSR 40x (채택 리스크 50% 할인 적용)
+          글로벌 DRAM 시장 ~$100B<br>
+          → 0.5% royalty × PSR 40x = <strong>$20B</strong><br>
+          → 1.0% royalty × PSR 40x = <strong>$40B</strong>
         </div>
-        <div class="val-result">현재가치 <strong>~$10B ~ $20B</strong> (장기)<br><span style="font-size:0.82em;opacity:0.75">(로열티 0.5% 시 $10B / 1% 시 $20B, 할인 전)</span></div>
-        <div class="val-basis">근거: 삼성 1C DRAM 수율 55% → MST로 개선 시 경제적 가치 수천억. AI HBM 수요 급증.</div>
+        <div class="val-stock">
+          <span class="val-stock-label">DRAM 전체 채택 시 주가</span>
+          <span class="val-stock-price">$541 ~ $1,081</span>
+          <span class="val-stock-range">(37M주, 장기 이론치)</span>
+        </div>
+        <div class="val-basis">근거: 삼성 1C DRAM 수율 55% → MST 개선 시 수천억 가치. AI HBM 수요 급증.</div>
       </div>
+      <!-- Power/RF -->
       <div class="val-item">
         <div class="val-company">🟡 Power / RF / GaN</div>
         <div class="val-formula">
-          TrenchFET 시장 ~$5B<br>
-          → MST 침투율 20% → <strong>$1B</strong><br>
-          → 로열티 <strong>1~3%</strong> → <strong>$10~30M/year</strong><br>
-          → PSR 40x 적용 / GaN·RF 합산
+          TrenchFET $5B × 침투율 20% = $1B<br>
+          → 1% royalty × PSR 40x = <strong>$0.4B</strong><br>
+          → 3% royalty × PSR 40x = <strong>$1.2B</strong>
         </div>
-        <div class="val-result">현재가치 <strong>~$400M ~ $1.2B</strong><br><span style="font-size:0.82em;opacity:0.75">(로열티 1% 시 $400M / 3% 시 $1.2B)</span></div>
-        <div class="val-basis">근거: Infineon이 4년·$200M 투자해 TrenchFET 25% 개선. MST 40% 개선 → 도입 경제성 확보.</div>
+        <div class="val-stock">
+          <span class="val-stock-label">전력·RF 채택 시 주가</span>
+          <span class="val-stock-price">$11 ~ $32</span>
+          <span class="val-stock-range">(37M주 기준)</span>
+        </div>
+        <div class="val-basis">근거: Infineon 4년·$200M 투자로 TrenchFET 25% 개선. MST는 40% 개선 → 경제성 확보.</div>
       </div>
-      <div class="val-item">
-        <div class="val-company">📊 전체 시장 합산 (장기)</div>
-        <div class="val-formula">
-          GAA (TSMC+삼성+인텔): <strong>$8B ~ $16B</strong><br>
-          DRAM 전체: <strong>$10B ~ $20B</strong><br>
-          Power/RF/GaN: <strong>$0.4B ~ $1.2B</strong><br>
-          합산 가정 (단계적 달성)
+      <!-- Scenario Table -->
+      <div class="val-item" style="grid-column: 1 / -1;">
+        <div class="val-company">📊 계약 단계별 주가 시나리오 — "계약 성사 시 주가는 얼마?" (37M주 기준)</div>
+        <table class="scenario-table">
+          <thead>
+            <tr>
+              <th>시나리오</th>
+              <th>추가 시총</th>
+              <th>누적 시총</th>
+              <th>주가 (로열티 0.5%)</th>
+              <th>주가 (로열티 1%)</th>
+              <th>현재 대비</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="sc-name">현재 (기준)</td>
+              <td class="sc-note">—</td>
+              <td class="sc-note">~$0.2B</td>
+              <td class="sc-price">$5</td>
+              <td class="sc-price">$5</td>
+              <td class="sc-mult">1x</td>
+            </tr>
+            <tr>
+              <td class="sc-name">① TSMC 계약</td>
+              <td class="sc-note">+$6.4B ~ $12.8B</td>
+              <td class="sc-note">~$6.6B</td>
+              <td class="sc-price">~$178</td>
+              <td class="sc-price">~$351</td>
+              <td class="sc-mult">36x ~ 70x</td>
+            </tr>
+            <tr>
+              <td class="sc-name">② + 삼성 + 인텔</td>
+              <td class="sc-note">+$1.58B ~ $3.2B</td>
+              <td class="sc-note">~$8.2B</td>
+              <td class="sc-price">~$222</td>
+              <td class="sc-price">~$443</td>
+              <td class="sc-mult">44x ~ 89x</td>
+            </tr>
+            <tr class="sc-highlight">
+              <td class="sc-name">③ + DRAM 1개사 (Micron)</td>
+              <td class="sc-note">+$7B (시장 35% × 0.5% × 40)</td>
+              <td class="sc-note">~$15B</td>
+              <td class="sc-price">~$405</td>
+              <td class="sc-price">~$811</td>
+              <td class="sc-mult">81x ~ 162x</td>
+            </tr>
+            <tr>
+              <td class="sc-name">④ + DRAM 전체</td>
+              <td class="sc-note">+$20B ~ $40B</td>
+              <td class="sc-note">~$28B</td>
+              <td class="sc-price">~$757</td>
+              <td class="sc-price">~$1,514</td>
+              <td class="sc-mult">151x ~ 303x</td>
+            </tr>
+            <tr>
+              <td class="sc-name">⑤ + Power/RF/GaN</td>
+              <td class="sc-note">+$0.4B ~ $1.2B</td>
+              <td class="sc-note">~$29B</td>
+              <td class="sc-price">~$784</td>
+              <td class="sc-price">~$1,546</td>
+              <td class="sc-mult">157x ~ 309x</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="font-size:11px;color:#4b6280;font-family:'DM Mono',monospace;margin-top:10px;line-height:1.8">
+          ※ 0.5% 열: 보수적 기본 시나리오 / 1% 열: 기술 확산 시 낙관 시나리오<br>
+          ※ 주식수 37M주 기준 — 유상증자 발생 시 희석 (50~60M주 가정 시 약 30~40% 하향 조정)<br>
+          ※ 각 시나리오는 해당 계약이 성사된다고 가정했을 때의 이론치. 확률 할인 미반영
         </div>
-        <div class="val-result">장기 포텐셜 <strong>~$18B ~ $37B</strong><br><span style="font-size:0.82em;opacity:0.75">(로열티율 0.5% 下단 / 3% 上단 시나리오)</span></div>
-        <div class="val-basis">현재 시총 ~$200M 대비 <strong>90배~185배</strong> 범위 업사이드. 로열티 0.5% 하단 시 ~$18B(90x), 3% 상단 시 ~$37B(185x). Zero-to-One 비즈니스 특성. 계약 1건당 급격한 리레이팅.</div>
       </div>
     </div>
     <div class="val-note">
