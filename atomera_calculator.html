@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atomera 주가 시나리오 계산기</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #050810;
+    --surface: #0c1220;
+    --surface2: #111827;
+    --border: #1e2d45;
+    --accent: #00d4ff;
+    --purple: #7c3aed;
+    --purple-light: #a78bfa;
+    --green: #10b981;
+    --yellow: #f59e0b;
+    --blue: #3b82f6;
+    --text: #e2e8f0;
+    --muted: #64748b;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding: 24px 16px 48px;
+  }
+
+  .container { max-width: 860px; margin: 0 auto; }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .header-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    margin-bottom: 8px;
+  }
+  .header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(28px, 6vw, 44px);
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .header-sub {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* Result box */
+  .result-box {
+    background: linear-gradient(135deg, #0c1a2e, #111827);
+    border: 1px solid var(--purple);
+    border-radius: 16px;
+    padding: 28px 24px;
+    margin-bottom: 28px;
+    box-shadow: 0 0 40px rgba(124,58,237,0.15);
+    text-align: center;
+  }
+  .result-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+  .result-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(56px, 14vw, 96px);
+    color: var(--accent);
+    letter-spacing: 0.04em;
+    line-height: 1;
+    transition: all 0.3s ease;
+  }
+  .result-price.up { color: #34d399; }
+  .result-price.base { color: var(--muted); }
+  .result-meta {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .result-meta-item {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .result-meta-item span {
+    color: var(--purple-light);
+    margin-left: 4px;
+  }
+  .result-upside {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: var(--purple-light);
+    margin-top: 4px;
+    letter-spacing: 0.06em;
+  }
+
+  /* Panels */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 20px;
+    margin-bottom: 16px;
+  }
+  .panel-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .panel-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Slider controls */
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .slider-label {
+    font-size: 13px;
+    color: #cbd5e1;
+    min-width: 110px;
+    flex-shrink: 0;
+  }
+  .slider-label small {
+    display: block;
+    font-size: 10px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    margin-top: 1px;
+  }
+  input[type=range] {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px rgba(0,212,255,0.5);
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 14px rgba(0,212,255,0.8);
+  }
+  .slider-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    color: var(--accent);
+    min-width: 60px;
+    text-align: right;
+    letter-spacing: 0.04em;
+  }
+
+  /* Number input */
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .input-label {
+    font-size: 13px;
+    color: #cbd5e1;
+    min-width: 110px;
+    flex-shrink: 0;
+  }
+  .input-label small {
+    display: block;
+    font-size: 10px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    margin-top: 1px;
+  }
+  input[type=number] {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--accent);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    padding: 6px 12px;
+    width: 120px;
+    outline: none;
+    letter-spacing: 0.04em;
+    -moz-appearance: textfield;
+  }
+  input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+  input[type=number]:focus { border-color: var(--accent); box-shadow: 0 0 8px rgba(0,212,255,0.2); }
+  .input-unit {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* Contract checkboxes */
+  .contracts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+  }
+  .contract-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    user-select: none;
+  }
+  .contract-item:hover { border-color: #334155; }
+  .contract-item.active { border-color: var(--purple); background: rgba(124,58,237,0.07); }
+  .contract-item.active-green { border-color: var(--green); background: rgba(16,185,129,0.07); }
+  .contract-item.active-yellow { border-color: var(--yellow); background: rgba(245,158,11,0.07); }
+  .contract-item.active-blue { border-color: var(--blue); background: rgba(59,130,246,0.07); }
+
+  .contract-check {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    font-size: 12px;
+  }
+  .contract-item.active .contract-check,
+  .contract-item.active-green .contract-check,
+  .contract-item.active-yellow .contract-check,
+  .contract-item.active-blue .contract-check {
+    background: var(--purple);
+    border-color: var(--purple);
+    color: #fff;
+  }
+  .contract-item.active-green .contract-check { background: var(--green); border-color: var(--green); }
+  .contract-item.active-yellow .contract-check { background: var(--yellow); border-color: var(--yellow); }
+  .contract-item.active-blue .contract-check { background: var(--blue); border-color: var(--blue); }
+
+  .contract-info { flex: 1; }
+  .contract-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .contract-stage {
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .contract-contribution {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    color: var(--purple-light);
+    letter-spacing: 0.04em;
+    transition: color 0.2s;
+  }
+
+  /* Breakdown bar */
+  .breakdown {
+    margin-top: 16px;
+  }
+  .breakdown-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 10px;
+    letter-spacing: 0.08em;
+  }
+  .breakdown-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 7px;
+    font-size: 12px;
+  }
+  .breakdown-label {
+    min-width: 140px;
+    color: #94a3b8;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+  .breakdown-bar-bg {
+    flex: 1;
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .breakdown-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+  .breakdown-amount {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    color: var(--accent);
+    min-width: 60px;
+    text-align: right;
+    letter-spacing: 0.04em;
+  }
+
+  /* Reset button */
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    padding: 7px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-preset {
+    border-color: var(--purple);
+    color: var(--purple-light);
+  }
+  .btn-preset:hover { background: rgba(124,58,237,0.15); }
+
+  /* Note */
+  .note {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    line-height: 1.7;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  @media (max-width: 600px) {
+    .result-meta { gap: 12px; }
+    .slider-label { min-width: 90px; font-size: 12px; }
+    .input-label { min-width: 90px; font-size: 12px; }
+    .contracts-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="header-label">ATOMERA INC. (NASDAQ: ATOM) — INTERACTIVE CALCULATOR</div>
+    <h1>주가 시나리오 계산기</h1>
+    <div class="header-sub">계약·로열티율·주식수를 조정하면 목표 주가가 실시간으로 계산됩니다</div>
+  </div>
+
+  <!-- Result -->
+  <div class="result-box">
+    <div class="result-label">계약 성사 시 추정 주가</div>
+    <div class="result-price" id="resultPrice">$8.60</div>
+    <div class="result-upside" id="resultUpside">— 현재가 기준</div>
+    <div class="result-meta">
+      <div class="result-meta-item">추가 시총<span id="metaMktcap">$0</span></div>
+      <div class="result-meta-item">누적 시총<span id="metaTotal">$295M</span></div>
+      <div class="result-meta-item">선택 계약<span id="metaCount">0개</span></div>
+    </div>
+  </div>
+
+  <!-- Sliders -->
+  <div class="panel">
+    <div class="panel-title">파라미터 조정</div>
+
+    <div class="slider-row">
+      <div class="slider-label">로열티율
+        <small>연 매출 대비 %</small>
+      </div>
+      <input type="range" id="royaltySlider" min="0.1" max="3.0" step="0.1" value="0.5">
+      <div class="slider-val" id="royaltyVal">0.5%</div>
+    </div>
+
+    <div class="slider-row">
+      <div class="slider-label">PSR 배수
+        <small>ARM 기준 ~40x</small>
+      </div>
+      <input type="range" id="psrSlider" min="10" max="80" step="5" value="40">
+      <div class="slider-val" id="psrVal">40x</div>
+    </div>
+
+    <div class="input-row">
+      <div class="input-label">유통 주식수
+        <small>희석 시 늘어남</small>
+      </div>
+      <input type="number" id="sharesInput" value="34.4" min="1" max="200" step="0.1">
+      <div class="input-unit">M주</div>
+    </div>
+
+    <div class="input-row">
+      <div class="input-label">현재 주가
+        <small>Yahoo Finance 기준</small>
+      </div>
+      <input type="number" id="basePriceInput" value="8.60" min="0.01" max="9999" step="0.01">
+      <div class="input-unit">USD</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-preset" onclick="applyPreset('conservative')">보수 (0.5% / 40x)</button>
+      <button class="btn btn-preset" onclick="applyPreset('base')">기본 (1% / 40x)</button>
+      <button class="btn btn-preset" onclick="applyPreset('optimistic')">낙관 (2% / 50x)</button>
+      <button class="btn" onclick="resetAll()">초기화</button>
+    </div>
+  </div>
+
+  <!-- Contracts -->
+  <div class="panel">
+    <div class="panel-title">계약 선택 (클릭하여 ON/OFF)</div>
+    <div class="contracts-grid" id="contractsGrid">
+      <!-- contracts injected by JS -->
+    </div>
+
+    <!-- Breakdown -->
+    <div class="breakdown" id="breakdownSection" style="display:none">
+      <div class="breakdown-title">시총 기여 분석</div>
+      <div id="breakdownRows"></div>
+    </div>
+  </div>
+
+  <div class="note">
+    ※ 산출 공식: 시장규모 × 해당시장비중 × 로열티율 × PSR배수 = 시총 기여 추정치<br>
+    ※ 주가 = (현재 시총 + 선택 계약 시총 합산) ÷ 유통 주식수<br>
+    ※ 현재 주가 $8.60 / 시총 $295M 기준 (Yahoo Finance 2026.04.28) / 투자 참고용 추정치이며 실제와 다를 수 있음
+  </div>
+
+</div>
+
+<script>
+// ── 기초 데이터 ──────────────────────────────────────────────
+// 각 계약의 "기준 시장 규모 (B달러)"와 "기준 비중"을 저장
+// 실제 시총 기여 = market * share * royaltyRate * psrMultiple
+const CONTRACTS = [
+  {
+    id: 'stm',
+    name: 'STM (Power)',
+    stage: '✅ Phase 4 완료 · 상업 매출',
+    stageColor: '#10b981',
+    activeClass: 'active-green',
+    market: 3,      // $3B 전력 매출
+    share: 1.0,     // 100% 기준
+    defaultOn: true,
+    barColor: '#10b981',
+    note: '전력 반도체 $3B × 로열티율 × PSR'
+  },
+  {
+    id: 'infineon',
+    name: 'Infineon (Power)',
+    stage: '✅ 상업 매출 발생 중',
+    stageColor: '#10b981',
+    activeClass: 'active-green',
+    market: 5,
+    share: 0.20,
+    defaultOn: true,
+    barColor: '#10b981',
+    note: 'Power $5B × 침투율 20% × 로열티율 × PSR'
+  },
+  {
+    id: 'samsung',
+    name: 'Samsung GAA',
+    stage: '🟣 Phase 4 진행 중 ← 최근접',
+    stageColor: '#a78bfa',
+    activeClass: 'active',
+    market: 15,
+    share: 0.30,
+    defaultOn: false,
+    barColor: '#a78bfa',
+    note: '파운드리 $15B × GAA비중 30% × 로열티율 × PSR'
+  },
+  {
+    id: 'intel',
+    name: 'Intel GAA (18A)',
+    stage: '🟡 대규모 평가 중',
+    stageColor: '#f59e0b',
+    activeClass: 'active-yellow',
+    market: 17,
+    share: 0.20,
+    defaultOn: false,
+    barColor: '#f59e0b',
+    note: '파운드리 $17B × GAA비중 20% × 로열티율 × PSR'
+  },
+  {
+    id: 'micron',
+    name: 'Micron (DRAM)',
+    stage: '🟡 DRAM 평가 중',
+    stageColor: '#f59e0b',
+    activeClass: 'active-yellow',
+    market: 100,
+    share: 0.35,
+    defaultOn: false,
+    barColor: '#60a5fa',
+    note: 'DRAM $100B × Micron점유 35% × 로열티율 × PSR'
+  },
+  {
+    id: 'tsmc',
+    name: 'TSMC GAA (2nm)',
+    stage: '🔵 초기 단계 ← 가장 느림',
+    stageColor: '#60a5fa',
+    activeClass: 'active-blue',
+    market: 160,
+    share: 0.20,
+    defaultOn: false,
+    barColor: '#60a5fa',
+    note: '매출 $160B × GAA비중 20% × 로열티율 × PSR'
+  },
+  {
+    id: 'dram_rest',
+    name: 'DRAM 전체 (삼성·SK)',
+    stage: '🔵 장기 시나리오',
+    stageColor: '#60a5fa',
+    activeClass: 'active-blue',
+    market: 100,
+    share: 0.65,
+    defaultOn: false,
+    barColor: '#60a5fa',
+    note: 'DRAM $100B × 나머지 65% × 로열티율 × PSR'
+  },
+  {
+    id: 'gf',
+    name: 'GlobalFoundries',
+    stage: '🟡 평가 중',
+    stageColor: '#f59e0b',
+    activeClass: 'active-yellow',
+    market: 7,
+    share: 0.30,
+    defaultOn: false,
+    barColor: '#f59e0b',
+    note: '파운드리 $7B × 비중 30% × 로열티율 × PSR'
+  },
+];
+
+const BASE_MKTCAP_B = 0.295; // $295M
+
+// ── State ──────────────────────────────────────────────────────
+let state = {
+  royalty: 0.5,
+  psr: 40,
+  shares: 34.4,
+  basePrice: 8.60,
+  selected: new Set(CONTRACTS.filter(c => c.defaultOn).map(c => c.id))
+};
+
+// ── Init ───────────────────────────────────────────────────────
+function init() {
+  const grid = document.getElementById('contractsGrid');
+  CONTRACTS.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'contract-item' + (state.selected.has(c.id) ? ' ' + c.activeClass : '');
+    div.id = 'card-' + c.id;
+    div.onclick = () => toggleContract(c.id);
+    div.innerHTML = `
+      <div class="contract-check" id="check-${c.id}">${state.selected.has(c.id) ? '✓' : ''}</div>
+      <div class="contract-info">
+        <div class="contract-name">${c.name}</div>
+        <div class="contract-stage" style="color:${c.stageColor}">${c.stage}</div>
+        <div class="contract-contribution" id="contrib-${c.id}">계산 중...</div>
+      </div>
+    `;
+    grid.appendChild(div);
+  });
+
+  document.getElementById('royaltySlider').addEventListener('input', e => {
+    state.royalty = parseFloat(e.target.value);
+    document.getElementById('royaltyVal').textContent = state.royalty.toFixed(1) + '%';
+    calculate();
+  });
+  document.getElementById('psrSlider').addEventListener('input', e => {
+    state.psr = parseFloat(e.target.value);
+    document.getElementById('psrVal').textContent = state.psr + 'x';
+    calculate();
+  });
+  document.getElementById('sharesInput').addEventListener('input', e => {
+    state.shares = parseFloat(e.target.value) || 34.4;
+    calculate();
+  });
+  document.getElementById('basePriceInput').addEventListener('input', e => {
+    state.basePrice = parseFloat(e.target.value) || 8.60;
+    calculate();
+  });
+
+  calculate();
+}
+
+function toggleContract(id) {
+  if (state.selected.has(id)) {
+    state.selected.delete(id);
+  } else {
+    state.selected.add(id);
+  }
+  const c = CONTRACTS.find(x => x.id === id);
+  const card = document.getElementById('card-' + id);
+  const check = document.getElementById('check-' + id);
+  if (state.selected.has(id)) {
+    card.className = 'contract-item ' + c.activeClass;
+    check.textContent = '✓';
+  } else {
+    card.className = 'contract-item';
+    check.textContent = '';
+  }
+  calculate();
+}
+
+function calculate() {
+  const r = state.royalty / 100;
+  const psr = state.psr;
+  const shares = state.shares;
+  const basePrice = state.basePrice;
+  const baseMktcap = shares * basePrice / 1000; // in B
+
+  let totalAdd = 0;
+  const contributions = [];
+
+  CONTRACTS.forEach(c => {
+    const contrib = c.market * c.share * r * psr; // in B
+    // Update individual card
+    document.getElementById('contrib-' + c.id).textContent =
+      '+$' + formatB(contrib) + ' 시총 기여';
+
+    if (state.selected.has(c.id)) {
+      totalAdd += contrib;
+      contributions.push({ name: c.name, value: contrib, color: c.barColor });
+    }
+  });
+
+  const totalMktcap = BASE_MKTCAP_B + totalAdd; // B
+  const targetPrice = (totalMktcap * 1000) / shares;
+  const upside = targetPrice / basePrice;
+
+  // Update result
+  const priceEl = document.getElementById('resultPrice');
+  priceEl.textContent = '$' + formatPrice(targetPrice);
+  priceEl.className = 'result-price' + (upside > 1.05 ? ' up' : upside < 0.95 ? '' : ' base');
+
+  const upsideEl = document.getElementById('resultUpside');
+  if (upside >= 2) {
+    upsideEl.textContent = '현재 대비 ' + upside.toFixed(1) + '배 (' + Math.round((upside-1)*100) + '% 상승)';
+  } else if (upside > 1.01) {
+    upsideEl.textContent = '현재 대비 +' + Math.round((upside-1)*100) + '% 상승';
+  } else {
+    upsideEl.textContent = '— 현재가 기준';
+  }
+
+  document.getElementById('metaMktcap').textContent = '$' + formatB(totalAdd);
+  document.getElementById('metaTotal').textContent = '$' + formatB(totalMktcap);
+  document.getElementById('metaCount').textContent = state.selected.size + '개';
+
+  // Breakdown
+  if (contributions.length > 0) {
+    document.getElementById('breakdownSection').style.display = 'block';
+    const maxVal = Math.max(...contributions.map(c => c.value));
+    let html = '';
+    contributions.sort((a,b) => b.value - a.value).forEach(c => {
+      const pct = maxVal > 0 ? (c.value / maxVal * 100) : 0;
+      html += `
+        <div class="breakdown-row">
+          <div class="breakdown-label">${c.name}</div>
+          <div class="breakdown-bar-bg">
+            <div class="breakdown-bar-fill" style="width:${pct}%;background:${c.color}"></div>
+          </div>
+          <div class="breakdown-amount">$${formatB(c.value)}</div>
+        </div>`;
+    });
+    document.getElementById('breakdownRows').innerHTML = html;
+  } else {
+    document.getElementById('breakdownSection').style.display = 'none';
+  }
+}
+
+function formatPrice(v) {
+  if (v >= 1000) return Math.round(v).toLocaleString();
+  if (v >= 100) return Math.round(v).toString();
+  if (v >= 10) return v.toFixed(1);
+  return v.toFixed(2);
+}
+
+function formatB(v) {
+  if (v >= 1000) return (v/1000).toFixed(1) + 'T';
+  if (v >= 1) return v.toFixed(1) + 'B';
+  return (v * 1000).toFixed(0) + 'M';
+}
+
+function applyPreset(type) {
+  const presets = {
+    conservative: { royalty: 0.5, psr: 40 },
+    base:         { royalty: 1.0, psr: 40 },
+    optimistic:   { royalty: 2.0, psr: 50 },
+  };
+  const p = presets[type];
+  state.royalty = p.royalty;
+  state.psr = p.psr;
+  document.getElementById('royaltySlider').value = p.royalty;
+  document.getElementById('psrSlider').value = p.psr;
+  document.getElementById('royaltyVal').textContent = p.royalty.toFixed(1) + '%';
+  document.getElementById('psrVal').textContent = p.psr + 'x';
+  calculate();
+}
+
+function resetAll() {
+  state.royalty = 0.5;
+  state.psr = 40;
+  state.shares = 34.4;
+  state.basePrice = 8.60;
+  state.selected = new Set(CONTRACTS.filter(c => c.defaultOn).map(c => c.id));
+
+  document.getElementById('royaltySlider').value = 0.5;
+  document.getElementById('psrSlider').value = 40;
+  document.getElementById('sharesInput').value = 34.4;
+  document.getElementById('basePriceInput').value = 8.60;
+  document.getElementById('royaltyVal').textContent = '0.5%';
+  document.getElementById('psrVal').textContent = '40x';
+
+  CONTRACTS.forEach(c => {
+    const card = document.getElementById('card-' + c.id);
+    const check = document.getElementById('check-' + c.id);
+    if (state.selected.has(c.id)) {
+      card.className = 'contract-item ' + c.activeClass;
+      check.textContent = '✓';
+    } else {
+      card.className = 'contract-item';
+      check.textContent = '';
+    }
+  });
+  calculate();
+}
+
+init();
+</script>
+</body>
+</html>
