@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Atomera 경쟁??PSR 비교</title>
+  <title>Atomera 경쟁사 PSR 비교</title>
   <style>
     :root {
       --bg: #0a0a0f;
       --surface: #0f0f1a;
       --border: #1e2030;
       --text: #e2e8f0;
-      --muted: #9ca3af;
+      --muted: #6b7280;
       --accent: #6ee7b7;
       --yellow: #fbbf24;
       --purple: #a78bfa;
@@ -19,7 +19,7 @@
       --green: #34d399;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; min-height: 100vh; padding: 24px; font-size: 14px; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; min-height: 100vh; padding: 24px; }
 
     .page-title {
       font-size: 22px; font-weight: 700; color: var(--accent);
@@ -27,7 +27,7 @@
     }
     .page-sub { font-size: 12px; color: var(--muted); margin-bottom: 28px; font-family: 'Courier New', monospace; }
 
-    /* ?�?�??�약 카드 ?�?�?*/
+    /* ── 요약 카드 ── */
     .summary-row {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -40,11 +40,11 @@
       border-radius: 10px;
       padding: 14px 16px;
     }
-    .sum-label { font-size: 12px; color: var(--muted); font-family: 'Courier New', monospace; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .sum-label { font-size: 10px; color: var(--muted); font-family: 'Courier New', monospace; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
     .sum-value { font-size: 20px; font-weight: 700; }
-    .sum-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .sum-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
 
-    /* ?�?�?비교 ?�이�??�?�?*/
+    /* ── 비교 테이블 ── */
     .section-title {
       font-size: 13px; font-weight: 700; color: var(--muted);
       text-transform: uppercase; letter-spacing: 1px;
@@ -56,7 +56,7 @@
       min-width: 700px;
     }
     th {
-      background: #12121e; color: var(--muted); font-size: 12px;
+      background: #12121e; color: var(--muted); font-size: 10px;
       font-family: 'Courier New', monospace; text-transform: uppercase;
       letter-spacing: 1px; padding: 10px 14px; text-align: left;
       border-bottom: 1px solid var(--border);
@@ -70,8 +70,8 @@
     tr.highlight td:first-child { border-left: 3px solid var(--accent); }
 
     .company-name { font-weight: 600; font-size: 14px; }
-    .company-ticker { font-size: 12px; color: var(--muted); font-family: 'Courier New', monospace; }
-    .company-type { font-size: 12px; color: var(--blue); margin-top: 2px; }
+    .company-ticker { font-size: 10px; color: var(--muted); font-family: 'Courier New', monospace; }
+    .company-type { font-size: 10px; color: var(--blue); margin-top: 2px; }
 
     .num { font-family: 'Courier New', monospace; text-align: right; }
     .psr-bar-cell { width: 140px; }
@@ -80,7 +80,7 @@
 
     .tag {
       display: inline-block; padding: 2px 8px; border-radius: 4px;
-      font-size: 12px; font-family: 'Courier New', monospace; font-weight: 600;
+      font-size: 10px; font-family: 'Courier New', monospace; font-weight: 600;
     }
     .tag-ip { background: #1e1b4b; color: #818cf8; }
     .tag-semi { background: #1a2636; color: #60a5fa; }
@@ -94,7 +94,7 @@
     .upside.dn { color: var(--red); }
     .upside.na { color: var(--muted); }
 
-    /* ?�?�??�포???�?�?*/
+    /* ── 산포도 ── */
     .scatter-box {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -128,13 +128,13 @@
       white-space: nowrap;
     }
     .axis-label-x {
-      text-align: center; font-size: 12px; color: var(--muted);
+      text-align: center; font-size: 10px; color: var(--muted);
       font-family: 'Courier New', monospace; margin-top: 4px;
     }
     .axis-label-y {
       position: absolute;
       left: -38px; top: 50%;
-      font-size: 12px; color: var(--muted);
+      font-size: 10px; color: var(--muted);
       font-family: 'Courier New', monospace;
       transform: rotate(-90deg) translateX(50%);
       white-space: nowrap;
@@ -158,7 +158,7 @@
       height: 1px; background: #1a1a2e;
     }
 
-    /* ?�?�??�사?�트 ?�?�?*/
+    /* ── 인사이트 ── */
     .insight-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -173,192 +173,192 @@
     }
     .insight-icon { font-size: 20px; margin-bottom: 8px; }
     .insight-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
-    .insight-body { font-size: 13px; color: var(--muted); line-height: 1.7; }
+    .insight-body { font-size: 12px; color: var(--muted); line-height: 1.7; }
     .insight-body strong { color: var(--accent); }
 
-    .note { font-size: 13px; color: var(--muted); font-family: 'Courier New', monospace; margin-top: 20px; line-height: 1.7; }
+    .note { font-size: 11px; color: var(--muted); font-family: 'Courier New', monospace; margin-top: 20px; line-height: 1.7; }
   </style>
 </head>
 <body>
 
-  <div class="page-title">?�� 반도�?IP 기업 PSR 비교</div>
-  <div class="page-sub">Atomera vs 반도�?IP · ?�리??· EDA 기업 ??2026.04 기�?</div>
+  <div class="page-title">📊 반도체 IP 기업 PSR 비교</div>
+  <div class="page-sub">Atomera vs 반도체 IP · 팹리스 · EDA 기업 — 2026.04 기준</div>
 
-  <!-- ?�약 카드 -->
+  <!-- 요약 카드 -->
   <div class="summary-row">
     <div class="sum-card">
-      <div class="sum-label">Atomera ?�재 PSR</div>
+      <div class="sum-label">Atomera 현재 PSR</div>
       <div class="sum-value" style="color:var(--accent)">~3x</div>
-      <div class="sum-sub">매출 $0.8M 기�? 추정</div>
+      <div class="sum-sub">매출 $0.8M 기준 추정</div>
     </div>
     <div class="sum-card">
-      <div class="sum-label">IP ?�이?�싱 ?�균 PSR</div>
-      <div class="sum-value" style="color:var(--yellow)">15??0x</div>
-      <div class="sum-sub">ARM·Rambus·MPEG LA ??/div>
+      <div class="sum-label">IP 라이선싱 평균 PSR</div>
+      <div class="sum-value" style="color:var(--yellow)">15–40x</div>
+      <div class="sum-sub">ARM·Rambus·MPEG LA 등</div>
     </div>
     <div class="sum-card">
-      <div class="sum-label">매출 발생 ???�정 PSR</div>
-      <div class="sum-value" style="color:var(--purple)">20??0x</div>
-      <div class="sum-sub">IP ?�이?�싱 모델 기�?</div>
+      <div class="sum-label">매출 발생 시 적정 PSR</div>
+      <div class="sum-value" style="color:var(--purple)">20–40x</div>
+      <div class="sum-sub">IP 라이선싱 모델 기준</div>
     </div>
     <div class="sum-card">
-      <div class="sum-label">?�사?�드 (PSR 40x ??</div>
+      <div class="sum-label">업사이드 (PSR 40x 시)</div>
       <div class="sum-value" style="color:var(--green)">~13x</div>
-      <div class="sum-sub">?�재 ?�총 $295M 기�?</div>
+      <div class="sum-sub">현재 시총 $295M 기준</div>
     </div>
   </div>
 
-  <!-- 비교 ?�이�?-->
-  <div class="section-title">기업�?PSR 비교</div>
+  <!-- 비교 테이블 -->
+  <div class="section-title">기업별 PSR 비교</div>
   <div class="table-wrap">
     <table id="compareTable">
       <thead>
         <tr>
           <th>기업</th>
-          <th>비즈?�스 모델</th>
-          <th style="text-align:right">?��?총액</th>
-          <th style="text-align:right">?�매�?/th>
+          <th>비즈니스 모델</th>
+          <th style="text-align:right">시가총액</th>
+          <th style="text-align:right">연매출</th>
           <th style="text-align:right">PSR</th>
-          <th>PSR �?/th>
-          <th style="text-align:right">Atomera ?��?/th>
+          <th>PSR 바</th>
+          <th style="text-align:right">Atomera 대비</th>
         </tr>
       </thead>
       <tbody id="tableBody"></tbody>
     </table>
   </div>
 
-  <!-- ?�포??-->
+  <!-- 산포도 -->
   <div class="scatter-box">
-    <div class="scatter-title">PSR vs 매출 규모 분포??(버블 ?�기 = ?��?총액)</div>
+    <div class="scatter-title">PSR vs 매출 규모 분포도 (버블 크기 = 시가총액)</div>
     <div class="scatter-area" id="scatterArea">
       <div class="axis-label-y">PSR 배수</div>
     </div>
-    <div class="axis-label-x">?�간 매출 규모 ??/div>
+    <div class="axis-label-x">연간 매출 규모 →</div>
   </div>
 
-  <!-- ?�사?�트 -->
-  <div class="section-title">?�심 ?�사?�트</div>
+  <!-- 인사이트 -->
+  <div class="section-title">핵심 인사이트</div>
   <div class="insight-grid">
     <div class="insight-card">
-      <div class="insight-icon">?��</div>
-      <div class="insight-title">Atomera???�재 극단???�?��?</div>
+      <div class="insight-icon">🎯</div>
+      <div class="insight-title">Atomera는 현재 극단적 저평가</div>
       <div class="insight-body">
-        IP ?�이?�싱 기업 ARM?�?PSR <strong>30~40x</strong>, Rambus??<strong>10~20x</strong>.<br>
-        Atomera ?�재 PSR?�??�실??<strong>~3x</strong> ?��??�로,<br>
-        매출??발생?�기 ?�작??초기 ?�계?�을 감안?�도 ?�격????��?�다.
+        IP 라이선싱 기업 ARM은 PSR <strong>30~40x</strong>, Rambus는 <strong>10~20x</strong>.<br>
+        Atomera 현재 PSR은 사실상 <strong>~3x</strong> 수준으로,<br>
+        매출이 발생하기 시작한 초기 단계임을 감안해도 현격히 낮습니다.
       </div>
     </div>
     <div class="insight-card">
-      <div class="insight-icon">?��</div>
-      <div class="insight-title">IP ?�이?�싱 모델??고마�??�성</div>
+      <div class="insight-icon">📈</div>
+      <div class="insight-title">IP 라이선싱 모델의 고마진 특성</div>
       <div class="insight-body">
-        ARM ?�업?�익�?<strong>~50%</strong>, Rambus <strong>~40%</strong>.<br>
-        Atomera??MST® 기술???�수 IP ?�이?�싱?�로,<br>
-        매출 ?�장 ??<strong>?��? PSR ?�평가</strong>가 ?�연?�럽?�니??
+        ARM 영업이익률 <strong>~50%</strong>, Rambus <strong>~40%</strong>.<br>
+        Atomera의 MST® 기술도 순수 IP 라이선싱으로,<br>
+        매출 성장 시 <strong>높은 PSR 재평가</strong>가 자연스럽습니다.
       </div>
     </div>
     <div class="insight-card">
-      <div class="insight-icon">??/div>
-      <div class="insight-title">?�리�? ?�성 Phase 6 계약</div>
+      <div class="insight-icon">⚡</div>
+      <div class="insight-title">트리거: 삼성 Phase 6 계약</div>
       <div class="insight-body">
-        IP 기업 PSR ?�평가??<strong>매출 가?�성???�보?�는 ?�간</strong> 발생.<br>
-        ?�성 GAA ?�산 계약 체결 ??매출 ?�측 가????br>
-        PSR <strong>20x ??40x</strong> 리레?�팅 기�?.
+        IP 기업 PSR 재평가는 <strong>매출 가시성이 확보되는 순간</strong> 발생.<br>
+        삼성 GAA 양산 계약 체결 → 매출 예측 가능 →<br>
+        PSR <strong>20x → 40x</strong> 리레이팅 기대.
       </div>
     </div>
     <div class="insight-card">
-      <div class="insight-icon">?��</div>
-      <div class="insight-title">가??가까운 ?�사기업: Rambus</div>
+      <div class="insight-icon">🔍</div>
+      <div class="insight-title">가장 가까운 유사기업: Rambus</div>
       <div class="insight-body">
-        Rambus??메모�??�터?�이??IP ?�이?�싱?�로<br>
-        ?�성·SK·마이?�론�?계약. <strong>Atomera?�?구조 ?�일</strong>.<br>
-        Rambus 초기 매출 발생 ?�점 PSR??<strong>15~25x</strong>?�?�니??
+        Rambus는 메모리 인터페이스 IP 라이선싱으로<br>
+        삼성·SK·마이크론과 계약. <strong>Atomera와 구조 동일</strong>.<br>
+        Rambus 초기 매출 발생 시점 PSR이 <strong>15~25x</strong>였습니다.
       </div>
     </div>
   </div>
 
   <div class="note">
-    ???��?총액·매출?�?2026??4??기�? 공개 ?�이??(Yahoo Finance, Bloomberg)<br>
-    ??Atomera PSR?�?24???�매�?$0.8M 기�? 추정�?(?�업매출 본격????<br>
-    ??PSR = Price-to-Sales Ratio (주�? / 매출 배수)
+    ※ 시가총액·매출은 2026년 4월 기준 공개 데이터 (Yahoo Finance, Bloomberg)<br>
+    ※ Atomera PSR은 24년 연매출 $0.8M 기준 추정치 (상업매출 본격화 전)<br>
+    ※ PSR = Price-to-Sales Ratio (주가 / 매출 배수)
   </div>
 
 <script>
 const COMPANIES = [
   {
     name: 'Atomera', ticker: 'ATOM', type: 'atom',
-    typeLabel: '반도�?IP (MST®)',
+    typeLabel: '반도체 IP (MST®)',
     mktcap: 0.295, revenue: 0.0008, psr: 3,
-    note: '?�업매출 초기 ?�계',
+    note: '상업매출 초기 단계',
     color: '#6ee7b7'
   },
   {
     name: 'ARM Holdings', ticker: 'ARM', type: 'ip',
-    typeLabel: '반도�?IP ?�이?�싱',
+    typeLabel: '반도체 IP 라이선싱',
     mktcap: 145, revenue: 3.9, psr: 37,
-    note: '?�세�?모바??CPU IP',
+    note: '전세계 모바일 CPU IP',
     color: '#a78bfa'
   },
   {
     name: 'Rambus', ticker: 'RMBS', type: 'ip',
-    typeLabel: '메모�??�터?�이??IP',
+    typeLabel: '메모리 인터페이스 IP',
     mktcap: 4.2, revenue: 0.42, psr: 10,
-    note: 'DRAM ?�터?�이??IP · 가???�사',
+    note: 'DRAM 인터페이스 IP · 가장 유사',
     color: '#60a5fa'
   },
   {
     name: 'Synopsys', ticker: 'SNPS', type: 'eda',
-    typeLabel: 'EDA ?�프?�웨??,
+    typeLabel: 'EDA 소프트웨어',
     mktcap: 58, revenue: 6.1, psr: 9.5,
-    note: 'Atomera MSTcad ?�트??,
+    note: 'Atomera MSTcad 파트너',
     color: '#34d399'
   },
   {
     name: 'Cadence Design', ticker: 'CDNS', type: 'eda',
-    typeLabel: 'EDA ?�프?�웨??,
+    typeLabel: 'EDA 소프트웨어',
     mktcap: 62, revenue: 4.6, psr: 13,
-    note: 'EDA 2??,
+    note: 'EDA 2위',
     color: '#34d399'
   },
   {
-    name: 'MPEG LA (비상??', ticker: '??, type: 'ip',
-    typeLabel: '?�허 ?�이?�싱 ?�?,
+    name: 'MPEG LA (비상장)', ticker: '—', type: 'ip',
+    typeLabel: '특허 라이선싱 풀',
     mktcap: null, revenue: 0.5, psr: null,
-    note: 'IP ?�이?�싱 ?�사 모델',
+    note: 'IP 라이선싱 유사 모델',
     color: '#6b7280'
   },
   {
     name: 'Qualcomm', ticker: 'QCOM', type: 'semi',
-    typeLabel: '?�리??+ IP ?�이?�싱',
+    typeLabel: '팹리스 + IP 라이선싱',
     mktcap: 165, revenue: 39, psr: 4.2,
-    note: '?�이?�싱 ?�업부 별도 고PSR',
+    note: '라이선싱 사업부 별도 고PSR',
     color: '#f59e0b'
   },
   {
     name: 'CEVA', ticker: 'CEVA', type: 'ip',
-    typeLabel: 'DSP IP ?�이?�싱',
+    typeLabel: 'DSP IP 라이선싱',
     mktcap: 0.59, revenue: 0.098, psr: 6,
-    note: '?�규�?IP ?�이?�싱',
+    note: '소규모 IP 라이선싱',
     color: '#818cf8'
   },
   {
     name: 'Lattice Semi', ticker: 'LSCC', type: 'semi',
-    typeLabel: 'FPGA 반도�?,
+    typeLabel: 'FPGA 반도체',
     mktcap: 5.8, revenue: 0.51, psr: 11,
-    note: '?�형 반도�?고PSR ?��?',
+    note: '소형 반도체 고PSR 사례',
     color: '#f59e0b'
   },
   {
     name: 'Impinj', ticker: 'PI', type: 'semi',
     typeLabel: 'RFID IC',
     mktcap: 4.1, revenue: 0.32, psr: 13,
-    note: '?�새?�장 고PSR 반도�?,
+    note: '틈새시장 고PSR 반도체',
     color: '#f59e0b'
   },
 ];
 
 function fmt(v, decimals=1) {
-  if (v === null) return '??;
+  if (v === null) return '—';
   if (v >= 1000) return '$' + (v/1000).toFixed(1) + 'T';
   if (v >= 1) return '$' + v.toFixed(decimals) + 'B';
   if (v >= 0.001) return '$' + (v*1000).toFixed(0) + 'M';
@@ -372,12 +372,12 @@ function tagClass(type) {
 const maxPSR = 40;
 const atomPSR = 3;
 
-// ?�이�??�더
+// 테이블 렌더
 const tbody = document.getElementById('tableBody');
 COMPANIES.forEach(c => {
-  const psr = c.psr !== null ? c.psr.toFixed(1) + 'x' : '??;
+  const psr = c.psr !== null ? c.psr.toFixed(1) + 'x' : '—';
   const barPct = c.psr !== null ? Math.min(c.psr / maxPSR * 100, 100) : 0;
-  const ratio = c.psr !== null && c.name !== 'Atomera' ? (c.psr / atomPSR).toFixed(1) + 'x ?? : '??;
+  const ratio = c.psr !== null && c.name !== 'Atomera' ? (c.psr / atomPSR).toFixed(1) + 'x ↑' : '—';
   const highlight = c.name === 'Rambus' || c.name === 'Atomera' ? 'highlight' : '';
 
   tbody.innerHTML += `
@@ -387,7 +387,7 @@ COMPANIES.forEach(c => {
         <div class="company-ticker">${c.ticker}</div>
         <div class="company-type"><span class="tag ${tagClass(c.type)}">${c.typeLabel}</span></div>
       </td>
-      <td style="font-size:13px;color:var(--muted);max-width:160px">${c.note}</td>
+      <td style="font-size:11px;color:var(--muted);max-width:160px">${c.note}</td>
       <td class="num">${fmt(c.mktcap)}</td>
       <td class="num">${fmt(c.revenue)}</td>
       <td class="num" style="font-weight:700;color:${c.psr > 20 ? 'var(--purple)' : c.psr > 8 ? 'var(--yellow)' : 'var(--muted)'}">${psr}</td>
@@ -399,12 +399,12 @@ COMPANIES.forEach(c => {
   `;
 });
 
-// ?�포???�더
+// 산포도 렌더
 const area = document.getElementById('scatterArea');
 const W = area.offsetWidth || 600;
 const H = 260;
 
-// 그리?�라??
+// 그리드라인
 [25, 50, 75].forEach(pct => {
   const g = document.createElement('div');
   g.className = 'scatter-gridline-v';
@@ -418,8 +418,8 @@ const H = 260;
   area.appendChild(g);
 });
 
-// �??�금
-const xLabels = ['?�형', '중형', '?�??, '초�???];
+// 축 눈금
+const xLabels = ['소형', '중형', '대형', '초대형'];
 xLabels.forEach((l, i) => {
   const tick = document.createElement('div');
   tick.className = 'scatter-tick-x';
@@ -436,7 +436,7 @@ yLabels.forEach((l, i) => {
   area.appendChild(tick);
 });
 
-// 매출 기�? x�?(log scale 근사)
+// 매출 기준 x축 (log scale 근사)
 function xPos(rev) {
   if (rev <= 0) return 2;
   const mn = Math.log10(0.0008), mx = Math.log10(40);
@@ -456,13 +456,13 @@ COMPANIES.forEach(c => {
   const dot = document.createElement('div');
   dot.className = 'scatter-dot';
   dot.style.cssText = `left:${x}%;bottom:${y}%;width:${size}px;height:${size}px;background:${c.color};`;
-  dot.title = `${c.name}\nPSR: ${c.psr}x\n매출: ${fmt(c.revenue)}\n?�총: ${fmt(c.mktcap)}`;
+  dot.title = `${c.name}\nPSR: ${c.psr}x\n매출: ${fmt(c.revenue)}\n시총: ${fmt(c.mktcap)}`;
   area.appendChild(dot);
 
   const lbl = document.createElement('div');
   lbl.className = 'scatter-label';
   lbl.style.cssText = `left:${x}%;bottom:${y}%;`;
-  lbl.textContent = c.ticker === '?? ? c.name.split(' ')[0] : c.ticker;
+  lbl.textContent = c.ticker === '—' ? c.name.split(' ')[0] : c.ticker;
   area.appendChild(lbl);
 });
 </script>
