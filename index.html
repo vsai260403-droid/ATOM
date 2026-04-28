@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atomera (ATOM) 투자 분석</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0a0f;
+      font-family: 'Segoe UI', sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── 상단 탭바 ── */
+    .tabbar {
+      display: flex;
+      align-items: stretch;
+      background: #0d0d14;
+      border-bottom: 1px solid #1e2030;
+      padding: 0 8px;
+      gap: 2px;
+      flex-shrink: 0;
+      height: 46px;
+    }
+
+    .tab-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 16px 0 8px;
+      border-right: 1px solid #1e2030;
+      margin-right: 6px;
+    }
+    .tab-logo .ticker {
+      font-size: 15px;
+      font-weight: 700;
+      color: #6ee7b7;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 1px;
+    }
+    .tab-logo .name {
+      font-size: 10px;
+      color: #4b5563;
+      font-family: 'Courier New', monospace;
+    }
+
+    .tab {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 18px;
+      cursor: pointer;
+      color: #6b7280;
+      font-size: 13px;
+      font-weight: 500;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .tab:hover {
+      color: #d1d5db;
+      background: #12121c;
+    }
+    .tab.active {
+      color: #e2e8f0;
+      border-bottom-color: #6ee7b7;
+      background: #12121c;
+    }
+    .tab .tab-icon {
+      font-size: 15px;
+      line-height: 1;
+    }
+    .tab .tab-label {
+      line-height: 1;
+    }
+    .tab .tab-sub {
+      font-size: 10px;
+      color: #4b5563;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* ── iframe 패널 ── */
+    .panels {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel {
+      position: absolute;
+      inset: 0;
+      display: none;
+    }
+    .panel.active {
+      display: block;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* ── 모바일 탭바 ── */
+    @media (max-width: 640px) {
+      .tabbar {
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      .tabbar::-webkit-scrollbar { display: none; }
+      .tab { padding: 0 12px; font-size: 12px; }
+      .tab .tab-sub { display: none; }
+      .tab-logo .name { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 탭바 -->
+  <div class="tabbar">
+    <div class="tab-logo">
+      <div>
+        <div class="ticker">ATOM</div>
+        <div class="name">Atomera Inc.</div>
+      </div>
+    </div>
+
+    <div class="tab active" onclick="switchTab(0)" id="btn-0">
+      <span class="tab-icon">📊</span>
+      <div>
+        <div class="tab-label">파이프라인</div>
+        <div class="tab-sub">고객 현황 · 밸류에이션</div>
+      </div>
+    </div>
+
+    <div class="tab" onclick="switchTab(1)" id="btn-1">
+      <span class="tab-icon">🧮</span>
+      <div>
+        <div class="tab-label">시나리오 계산기</div>
+        <div class="tab-sub">주가 · 내 포트폴리오</div>
+      </div>
+    </div>
+
+    <div class="tab" onclick="switchTab(2)" id="btn-2">
+      <span class="tab-icon">🗓️</span>
+      <div>
+        <div class="tab-label">분기별 로드맵</div>
+        <div class="tab-sub">마일스톤 · 촉매</div>
+      </div>
+    </div>
+
+    <div class="tab" onclick="switchTab(3)" id="btn-3">
+      <span class="tab-icon">📅</span>
+      <div>
+        <div class="tab-label">이벤트 타임라인</div>
+        <div class="tab-sub">상세 히스토리</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 패널 (iframe) -->
+  <div class="panels">
+    <div class="panel active" id="panel-0">
+      <iframe src="atomera_pipeline.html" id="frame-0"></iframe>
+    </div>
+    <div class="panel" id="panel-1">
+      <iframe src="atomera_calculator.html" id="frame-1" loading="lazy"></iframe>
+    </div>
+    <div class="panel" id="panel-2">
+      <iframe src="atomera_roadmap.html" id="frame-2" loading="lazy"></iframe>
+    </div>
+    <div class="panel" id="panel-3">
+      <iframe src="atomera_timeline.html" id="frame-3" loading="lazy"></iframe>
+    </div>
+  </div>
+
+  <script>
+    let currentTab = 0;
+
+    function switchTab(idx) {
+      // 이전 탭 비활성
+      document.getElementById('btn-' + currentTab).classList.remove('active');
+      document.getElementById('panel-' + currentTab).classList.remove('active');
+
+      // 새 탭 활성
+      document.getElementById('btn-' + idx).classList.add('active');
+      document.getElementById('panel-' + idx).classList.add('active');
+
+      currentTab = idx;
+    }
+  </script>
+
+</body>
+</html>
