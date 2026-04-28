@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atomera 고객사 파이프라인 현황 — 2026.04</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050810;
+    --surface: #0c1220;
+    --surface2: #111827;
+    --border: #1e2d45;
+    --accent: #00d4ff;
+    --accent2: #7c3aed;
+    --green: #10b981;
+    --yellow: #f59e0b;
+    --red: #ef4444;
+    --orange: #f97316;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --phase4: #7c3aed;
+    --phase3: #2563eb;
+    --commercial: #10b981;
+    --eval: #f59e0b;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Ambient grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* Header */
+  .header {
+    margin-bottom: 56px;
+  }
+
+  .header-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .header-label::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 6vw, 72px);
+    letter-spacing: 0.04em;
+    line-height: 1;
+    background: linear-gradient(135deg, #ffffff 0%, var(--accent) 60%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+  }
+
+  .header-meta {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .meta-item span {
+    color: var(--text);
+    margin-left: 6px;
+  }
+
+  /* Phase legend */
+  .legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+    padding: 20px 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+
+  .legend-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    width: 100%;
+    margin-bottom: 4px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  /* Pipeline stages visual */
+  .pipeline-stages {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 48px;
+    overflow-x: auto;
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+
+  .stage-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 100px;
+    position: relative;
+  }
+
+  .stage-item:not(:last-child)::after {
+    content: '→';
+    position: absolute;
+    right: -12px;
+    top: 14px;
+    color: var(--border);
+    font-size: 18px;
+    z-index: 1;
+  }
+
+  .stage-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    border: 2px solid var(--border);
+    color: var(--muted);
+    background: var(--bg);
+  }
+
+  .stage-num.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 12px rgba(0,212,255,0.3);
+  }
+
+  .stage-num.phase4 {
+    border-color: var(--phase4);
+    color: var(--phase4);
+    box-shadow: 0 0 12px rgba(124,58,237,0.4);
+    background: rgba(124,58,237,0.1);
+  }
+
+  .stage-name {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+
+  .stage-desc {
+    font-size: 10px;
+    color: #374151;
+    text-align: center;
+  }
+
+  /* Section title */
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-title .count-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2px 10px;
+    color: var(--muted);
+    letter-spacing: 0;
+  }
+
+  /* Customer cards grid */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 20px;
+    margin-bottom: 48px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+    animation: fadeIn 0.5s ease both;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    border-color: var(--border);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card:nth-child(1) { animation-delay: 0.05s; }
+  .card:nth-child(2) { animation-delay: 0.1s; }
+  .card:nth-child(3) { animation-delay: 0.15s; }
+  .card:nth-child(4) { animation-delay: 0.2s; }
+  .card:nth-child(5) { animation-delay: 0.25s; }
+  .card:nth-child(6) { animation-delay: 0.3s; }
+  .card:nth-child(7) { animation-delay: 0.35s; }
+  .card:nth-child(8) { animation-delay: 0.4s; }
+
+  /* Card accent glow */
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .card.phase4::before { background: linear-gradient(90deg, var(--phase4), #9f67ff); }
+  .card.phase3::before { background: linear-gradient(90deg, var(--phase3), #60a5fa); }
+  .card.commercial::before { background: linear-gradient(90deg, var(--green), #34d399); }
+  .card.evaluation::before { background: linear-gradient(90deg, var(--yellow), #fcd34d); }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    gap: 12px;
+  }
+
+  .company-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    color: #fff;
+  }
+
+  .company-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .status-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .badge-phase4 {
+    background: rgba(124,58,237,0.15);
+    border: 1px solid rgba(124,58,237,0.4);
+    color: #a78bfa;
+  }
+  .badge-phase4::before { background: #a78bfa; animation: pulse 1.5s infinite; }
+
+  .badge-commercial {
+    background: rgba(16,185,129,0.15);
+    border: 1px solid rgba(16,185,129,0.4);
+    color: #34d399;
+  }
+  .badge-commercial::before { background: #34d399; animation: pulse 1.5s infinite; }
+
+  .badge-evaluation {
+    background: rgba(245,158,11,0.12);
+    border: 1px solid rgba(245,158,11,0.35);
+    color: #fbbf24;
+  }
+  .badge-evaluation::before { background: #fbbf24; }
+
+  .badge-phase3 {
+    background: rgba(37,99,235,0.15);
+    border: 1px solid rgba(37,99,235,0.4);
+    color: #60a5fa;
+  }
+  .badge-phase3::before { background: #60a5fa; }
+
+  /* Phase progress bar */
+  .phase-track {
+    margin-bottom: 20px;
+  }
+
+  .phase-track-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .phase-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .phase-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 1s ease;
+  }
+
+  .fill-phase4 { background: linear-gradient(90deg, var(--phase4), #9f67ff); width: 66%; }
+  .fill-phase3 { background: linear-gradient(90deg, var(--phase3), #60a5fa); width: 50%; }
+  .fill-commercial { background: linear-gradient(90deg, var(--green), #34d399); width: 75%; }
+  .fill-eval-high { background: linear-gradient(90deg, var(--yellow), #fcd34d); width: 45%; }
+  .fill-eval-mid { background: linear-gradient(90deg, var(--yellow), #fcd34d); width: 35%; }
+  .fill-eval-low { background: linear-gradient(90deg, var(--yellow), #fcd34d); width: 25%; }
+
+  /* Info rows */
+  .info-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 13px;
+  }
+
+  .info-label {
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+    padding-top: 1px;
+  }
+
+  .info-value {
+    color: var(--text);
+    font-size: 13px;
+    text-align: right;
+    line-height: 1.4;
+  }
+
+  .info-value.highlight {
+    color: #fff;
+    font-weight: 500;
+  }
+
+  /* Tags */
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  .tag {
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .tag.active {
+    background: rgba(0,212,255,0.08);
+    border-color: rgba(0,212,255,0.25);
+    color: var(--accent);
+  }
+
+  /* Revenue display */
+  .revenue-box {
+    background: rgba(16,185,129,0.08);
+    border: 1px solid rgba(16,185,129,0.2);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+  }
+
+  .revenue-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+
+  .revenue-amount {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: var(--green);
+    letter-spacing: 0.05em;
+  }
+
+  /* Potential value box */
+  .potential-box {
+    background: rgba(124,58,237,0.08);
+    border: 1px solid rgba(124,58,237,0.2);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .potential-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .potential-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    color: #a78bfa;
+    letter-spacing: 0.05em;
+  }
+
+  /* Summary stats */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    animation: fadeIn 0.5s ease both;
+  }
+
+  .stat-card:nth-child(1) { animation-delay: 0.0s; }
+  .stat-card:nth-child(2) { animation-delay: 0.07s; }
+  .stat-card:nth-child(3) { animation-delay: 0.14s; }
+  .stat-card:nth-child(4) { animation-delay: 0.21s; }
+
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    line-height: 1;
+    letter-spacing: 0.03em;
+  }
+
+  .stat-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .color-green { color: var(--green); }
+  .color-purple { color: #a78bfa; }
+  .color-blue { color: #60a5fa; }
+  .color-yellow { color: #fbbf24; }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 48px 0;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Note box */
+  .note-box {
+    background: rgba(245,158,11,0.06);
+    border: 1px solid rgba(245,158,11,0.2);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-top: 16px;
+    font-size: 12px;
+    color: #fbbf24;
+    font-family: 'DM Mono', monospace;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 640px) {
+    .cards-grid { grid-template-columns: 1fr; }
+    .pipeline-stages { gap: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-label">ATOMERA INC. (NASDAQ: ATOM) — CUSTOMER PIPELINE TRACKER</div>
+    <h1>고객사 계약 현황</h1>
+    <div class="header-meta">
+      <div class="meta-item">기준일<span>2026년 4월 28일</span></div>
+      <div class="meta-item">출처<span>어반라이프인서울 #6~10</span></div>
+      <div class="meta-item">총 고객<span>10개사 (추정 포함)</span></div>
+    </div>
+  </div>
+
+  <!-- Summary Stats -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-label">공식 계약 체결</div>
+      <div class="stat-value color-purple">2</div>
+      <div class="stat-sub">STM · Samsung (Phase 4)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">상업 매출 발생</div>
+      <div class="stat-value color-green">1</div>
+      <div class="stat-sub">Infineon (MST 웨이퍼)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">대규모 평가 중</div>
+      <div class="stat-value color-blue">4</div>
+      <div class="stat-sub">TI · Intel · Micron · GF</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Q1 2026 매출</div>
+      <div class="stat-value color-yellow">$50~100K</div>
+      <div class="stat-sub">최초 상업 매출 달성</div>
+    </div>
+  </div>
+
+  <!-- Phase Process -->
+  <div class="pipeline-stages">
+    <div class="stage-item">
+      <div class="stage-num">1</div>
+      <div class="stage-name">Planning</div>
+      <div class="stage-desc">TCAD 시뮬레이션</div>
+    </div>
+    <div class="stage-item">
+      <div class="stage-num">2</div>
+      <div class="stage-name">Setup</div>
+      <div class="stage-desc">물리적 특성 확인</div>
+    </div>
+    <div class="stage-item">
+      <div class="stage-num active">3</div>
+      <div class="stage-name">Integration</div>
+      <div class="stage-desc">웨이퍼 증착 테스트</div>
+    </div>
+    <div class="stage-item">
+      <div class="stage-num phase4">4</div>
+      <div class="stage-name">Installation</div>
+      <div class="stage-desc">★ 양산 License 계약</div>
+    </div>
+    <div class="stage-item">
+      <div class="stage-num">5</div>
+      <div class="stage-name">Qualification</div>
+      <div class="stage-desc">양산 검증 (6~9개월)</div>
+    </div>
+    <div class="stage-item">
+      <div class="stage-num">6</div>
+      <div class="stage-name">Production</div>
+      <div class="stage-desc">로열티 발생 시작</div>
+    </div>
+  </div>
+
+  <!-- Section: 공식 계약 -->
+  <div class="section-title">
+    공식 계약 (Phase 4 — JDA)
+    <span class="count-badge">2개사</span>
+  </div>
+  <div class="cards-grid">
+
+    <!-- STMicroelectronics -->
+    <div class="card phase4">
+      <div class="card-header">
+        <div>
+          <div class="company-name">STMicroelectronics</div>
+          <div class="company-sub">유럽 최대 종합반도체 / Agrate 300mm Fab</div>
+        </div>
+        <span class="status-badge badge-phase4">Phase 4</span>
+      </div>
+      <div class="phase-track">
+        <div class="phase-track-label">
+          <span>진행 단계</span>
+          <span>Phase 4 / 6</span>
+        </div>
+        <div class="phase-bar"><div class="phase-fill fill-phase4"></div></div>
+      </div>
+      <div class="info-rows">
+        <div class="info-row">
+          <span class="info-label">계약 형태</span>
+          <span class="info-value highlight">JDA (공동개발협약)</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">적용 분야</span>
+          <div class="tags">
+            <span class="tag">BCD 전력반도체</span>
+            <span class="tag active">FDSOI</span>
+            <span class="tag active">GaN</span>
+            <span class="tag active">RF SOI</span>
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="info-label">이슈</span>
+          <span class="info-value" style="color:#f87171">BCD110 적용 취소 (타이밍 불일치)<br>→ 다른 제품군 협력 유지 중</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">상태</span>
+          <span class="info-value" style="color:#fbbf24">BCD110 외 항목 재협의 진행 중</span>
+        </div>
+      </div>
+      <div class="potential-box">
+        <span class="potential-label">계약 체결 시 시총 기여 추정</span>
+        <span class="potential-value">~ ₩2,000억+</span>
+      </div>
+    </div>
+
+    <!-- Samsung -->
+    <div class="card phase4">
+      <div class="card-header">
+        <div>
+          <div class="company-name">Samsung</div>
+          <div class="company-sub">삼성 파운드리 / JDA1 고객사</div>
+        </div>
+        <span class="status-badge badge-phase4">Phase 4</span>
+      </div>
+      <div class="phase-track">
+        <div class="phase-track-label">
+          <span>진행 단계</span>
+          <span>Phase 4 / 6</span>
+        </div>
+        <div class="phase-bar"><div class="phase-fill fill-phase4"></div></div>
+      </div>
+      <div class="info-rows">
+        <div class="info-row">
+          <span class="info-label">계약 형태</span>
+          <span class="info-value highlight">JDA1 (공식 공동개발협약)</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">적용 분야</span>
+          <div class="tags">
+            <span class="tag active">GAA 2nm</span>
+            <span class="tag">DRAM</span>
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="info-label">최근 동향</span>
+          <span class="info-value" style="color:#34d399">장비 파트너와 신규 진전<br>GAA 평가 지속 중</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">고객명 공개</span>
+          <span class="info-value" style="color:#fbbf24">미공개 (추정)</span>
+        </div>
+      </div>
+      <div class="potential-box">
+        <span class="potential-label">GAA 양산 계약 시 시총 기여</span>
+        <span class="potential-value">~ ₩1조</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Section: 상업 매출 발생 -->
+  <div class="section-title">
+    상업 매출 발생 (MST 웨이퍼 판매)
+    <span class="count-badge">1개사</span>
+  </div>
+  <div class="cards-grid">
+
+    <!-- Infineon -->
+    <div class="card commercial">
+      <div class="card-header">
+        <div>
+          <div class="company-name">Infineon</div>
+          <div class="company-sub">독일 / Villach 300mm GaN-on-Si Fab 보유</div>
+        </div>
+        <span class="status-badge badge-commercial">매출 발생 ✓</span>
+      </div>
+      <div class="phase-track">
+        <div class="phase-track-label">
+          <span>상업화 진행도</span>
+          <span>샘플 → 양산 확대 중</span>
+        </div>
+        <div class="phase-bar"><div class="phase-fill fill-commercial"></div></div>
+      </div>
+      <div class="info-rows">
+        <div class="info-row">
+          <span class="info-label">거래 형태</span>
+          <span class="info-value highlight">MST 증착 웨이퍼 직접 판매</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">적용 분야</span>
+          <div class="tags">
+            <span class="tag active">GaN-on-Si (RF)</span>
+            <span class="tag active">GaN-on-Si (Power)</span>
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="info-label">특이사항</span>
+          <span class="info-value" style="color:#34d399">자체 Epi + 소자 제조 가능<br>세계 최초 300mm GaN-on-Si 양산</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">채택 이유</span>
+          <span class="info-value">MST가 GaN/Si 격자 불일치 응력 완화<br>("코끼리 4마리 응력"을 버퍼링)</span>
+        </div>
+      </div>
+      <div class="revenue-box">
+        <div>
+          <div class="revenue-label">Q1 2026 매출 가이던스</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">전년 연간 매출($65K) 초과 달성</div>
+        </div>
+        <div class="revenue-amount">$50K ~ $100K</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Section: 대규모 평가 중 -->
+  <div class="section-title">
+    대규모 평가 진행 중 (계약 임박)
+    <span class="count-badge">4개사</span>
+  </div>
+  <div class="cards-grid">
+
+    <!-- Texas Instruments -->
+    <div class="card evaluation">
+      <div class="card-header">
+        <div>
+          <div class="company-name">Texas Instruments</div>
+          <div class="company-sub">TR2 추정 / 대형 아날로그 업체</div>
+        </div>
+        <span class="status-badge badge-evaluation">Phase 3 고도화</span>
+      </div>
+      <div class="phase-track">
+        <div class="phase-track-label">
+          <span>평가 진행도</span>
+          <span>웨이퍼 런 완료 → 결과 분석</span>
+        </div>
+        <div class="phase-bar"><div class="phase-fill fill-eval-high"></div></div>
+      </div>
+      <div class="info-rows">
+        <div class="info-row">
+          <span class="info-label">적용 분야</span>
+          <div class="tags">
+            <span class="tag active">Power (BCD/NextFET)</span>
+            <span class="tag active">GaN (800V DC)</span>
+            <span class="tag active">Analog</span>
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="info-label">최근 상황</span>
+          <span class="info-value" style="color:#34d399">MST-CAD 검증 완료 후<br>대규모 웨이퍼 런 실행 (기록적 물량)</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">데이터센터</span>
+          <span class="info-value" style="color:#fbbf24">YoY 90% 성장 / 800V DC 아키텍처 대응</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">계약 전망</span>
+          <span class="info-value" style="color:#34d399">다양한 분야 계약 협상 진입 예상</span>
+        </div>
+      </div>
+      <div class="note-box">⚡ Scott 언급: "라이선스 및 생산 진입을 위한 첫 번째 단계로 계약으로 이어질 것으로 예상"</div>
+    </div>
+
+    <!-- Intel -->
+    <div class="card evaluation">
+      <div class="card-header">
+        <div>
+          <div class="company-name">Intel</div>
+          <div class="company-sub">TR3 추정 / GAA 18A·14A 파운드리</div>
+        </div>
+        <span class="status-badge badge-evaluation">GAA 평가 중</span>
+      </div>
+      <div class="phase-track">
+        <div class="phase-track-label">
+          <span>평가 진행도</span>
+          <span>예상보다 훨씬 빠른 속도</span>
+        </div>
+        <div class="phase-bar"><div class="phase-fill fill-eval-high"></div></div>
+      </div>
+      <div class="info-rows">
+        <div class="info-row">
+          <span class="info-label">적용 분야</span>
+          <div class="tags">
+            <span class="tag active">GAA (18A / 14A)</span>
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="info-label">핵심 성과</span>
+          <span class="info-value" style="color:#34d399">2nm GAA 실제 웨이퍼에 MST 증착 성공<br>SiAs 스페이서 대비 P 도판트 차단 2배 우수</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">수율 상황</span>
+          <span class="info-value" style="color:#f87171">18A 수율 개선 시급<br>MST 도입 필요성 매우 높음</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">계약 전망</span>
+          <span class="info-value" style="color:#fbbf24">수분기 내 상업 라이선스 전환 목표</span>
+        </div>
+      </div>
+      <div class="potential-box">
+        <span class="potential-label">계약 시 시총 기여 추정</span>
+        <span class="potential-value">~ ₩1조</span>
+      </div>
+    </div>
+
+    <!-- Micron -->
+    <div class="card evaluation">
+      <div class="card-header">
+        <div>
+          <div class="company-name">Micron</div>
+          <div class="company-sub">미국 최대 DRAM 업체</div>
+        </div>
+        <span class="status-badge badge-evaluation">DRAM 평가 중</span>
+      </div>
+      <div class="phase-track">
+        <div class="phase-track-label">
+          <span>평가 진행도</span>
+          <span>최종 데이터 ~1개월 내 예정</span>
+        </div>
+        <div class="phase-bar"><div class="phase-fill fill-eval-high"></div></div>
+      </div>
+      <div class="info-rows">
+        <div class="info-row">
+          <span class="info-label">적용 분야</span>
+          <div class="tags">
+            <span class="tag active">DRAM (웨이퍼 레벨)</span>
+            <span class="tag active">HBM</span>
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="info-label">새로운 방식</span>
+          <span class="info-value" style="color:#34d399">웨이퍼 레벨 MST 증착 도입<br>(기존 공정 내 삽입 방식보다 간단)</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">초기 결과</span>
+          <span class="info-value" style="color:#34d399">의미있는 초기 데이터 확보</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">계약 전망</span>
+          <span class="info-value" style="color:#fbbf24">최종 데이터 우수 시 → 적극 계약 추진</span>
+        </div>
+      </div>
+      <div class="note-box">⏳ AMAT + SK Hynix EPIC Center R&D 협력으로 SK하이닉스도 노출 가속화</div>
+    </div>
+
+    <!-- GlobalFoundries -->
+    <div class="card evaluation">
+      <div class="card-header">
+        <div>
+          <div class="company-name">GlobalFoundries</div>
+          <div class="company-sub">JDA2 추정 / 특화 공정 파운드리</div>
+        </div>
+        <span class="status-badge badge-evaluation">JDA2 평가</span>
+      </div>
+      <div class="phase-track">
+        <div class="phase-track-label">
+          <span>평가 진행도</span>
+          <span>웨이퍼 평가 완료 단계</span>
+        </div>
+        <div class="phase-bar"><div class="phase-fill fill-eval-mid"></div></div>
+      </div>
+      <div class="info-rows">
+        <div class="info-row">
+          <span class="info-label">계약 형태</span>
+          <span class="info-value highlight">JDA2 (두 번째 공동개발협약)</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">적용 분야</span>
+          <div class="tags">
+            <span class="tag active">RF-SOI</span>
+            <span class="tag">Logic</span>
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="info-label">현재 상태</span>
+          <span class="info-value" style="color:#fbbf24">웨이퍼 평가 → 계약 협상 단계 이행 준비</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Section: 초기 접촉/평가 시작 -->
+  <div class="section-title">
+    초기 접촉 · 평가 개시
+    <span class="count-badge">3개사</span>
+  </div>
+  <div class="cards-grid">
+
+    <!-- TSMC -->
+    <div class="card phase3">
+      <div class="card-header">
+        <div>
+          <div class="company-name">TSMC</div>
+          <div class="company-sub">세계 최대 파운드리 / 2nm GAA 양산 중</div>
+        </div>
+        <span class="status-badge badge-phase3">협의 중</span>
+      </div>
+      <div class="phase-track">
+        <div class="phase-track-label">
+          <span>진행도</span>
+          <span>적극 논의 시작</span>
+        </div>
+        <div class="phase-bar"><div class="phase-fill fill-eval-mid"></div></div>
+      </div>
+      <div class="info-rows">
+        <div class="info-row">
+          <span class="info-label">적용 분야</span>
+          <div class="tags">
+            <span class="tag active">GAA 2nm (N2)</span>
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="info-label">현재 상태</span>
+          <span class="info-value" style="color:#60a5fa">2nm 웨이퍼 MST 증착 데이터 공유<br>GAA 평가 확장 대상</span>
+        </div>
+      </div>
+      <div class="potential-box">
+        <span class="potential-label">계약 시 시총 기여 추정</span>
+        <span class="potential-value">~ ₩8조</span>
+      </div>
+    </div>
+
+    <!-- Qorvo -->
+    <div class="card phase3">
+      <div class="card-header">
+        <div>
+          <div class="company-name">Qorvo</div>
+          <div class="company-sub">미국 RF 반도체 팹리스</div>
+        </div>
+        <span class="status-badge badge-phase3">RF 평가 중</span>
+      </div>
+      <div class="phase-track">
+        <div class="phase-track-label">
+          <span>진행도</span>
+          <span>웨이퍼 평가 진행</span>
+        </div>
+        <div class="phase-bar"><div class="phase-fill fill-eval-low"></div></div>
+      </div>
+      <div class="info-rows">
+        <div class="info-row">
+          <span class="info-label">적용 분야</span>
+          <div class="tags">
+            <span class="tag active">RF-SOI</span>
+            <span class="tag active">LNA + Switch</span>
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="info-label">현재 상태</span>
+          <span class="info-value" style="color:#60a5fa">웨이퍼 평가 진행 중<br>→ 계약 협상 단계 이행 검토</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RF HBT 신규고객 -->
+    <div class="card phase3">
+      <div class="card-header">
+        <div>
+          <div class="company-name">RF HBT 신규고객</div>
+          <div class="company-sub">미공개 / 5G·6G RF 반도체</div>
+        </div>
+        <span class="status-badge badge-phase3">초기 논의</span>
+      </div>
+      <div class="phase-track">
+        <div class="phase-track-label">
+          <span>진행도</span>
+          <span>최초 고객 논의 시작</span>
+        </div>
+        <div class="phase-bar"><div class="phase-fill fill-eval-low"></div></div>
+      </div>
+      <div class="info-rows">
+        <div class="info-row">
+          <span class="info-label">적용 분야</span>
+          <div class="tags">
+            <span class="tag active">HBT (RF)</span>
+            <span class="tag">SiGe</span>
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="info-label">현재 상태</span>
+          <span class="info-value" style="color:#60a5fa">4Q25 컨콜에서 첫 잠재 고객<br>논의 시작 발표 (고도난이도 제품)</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">잠재 고객(추정)</span>
+          <span class="info-value" style="color:var(--muted)">Qorvo, Skyworks, Broadcom, NXP, STM 등</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-title">범례 — 계약 단계 정의</div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#a78bfa"></div>
+      <span><strong style="color:#a78bfa">Phase 4</strong> — 양산 License 계약 체결. 고객 팹 내 MST 설치. Manufacturing License Fee 지불.</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#34d399"></div>
+      <span><strong style="color:#34d399">상업 매출</strong> — MST 증착 웨이퍼를 제품으로 판매. 즉각 수익 발생. 라이선스 계약과 별도.</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#fbbf24"></div>
+      <span><strong style="color:#fbbf24">대규모 평가</strong> — 실제 양산 웨이퍼에서 MST 효과 검증 중. 계약 직전 단계.</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#60a5fa"></div>
+      <span><strong style="color:#60a5fa">Phase 3 / 초기</strong> — TCAD 또는 초기 웨이퍼 테스트 단계. 계약까지 수 분기 소요 예상.</span>
+    </div>
+  </div>
+
+  <div class="footer">
+    ATOMERA INC. (NASDAQ: ATOM) — 비공개 추정 포함 / 투자 참고용 자료 — 2026.04.28
+  </div>
+
+</div>
+</body>
+</html>
