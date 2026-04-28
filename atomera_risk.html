@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Atomera 리스크 매트릭스</title>
+  <title>Atomera 리스??매트�?��</title>
   <style>
     :root {
       --bg: #0a0a0f; --surface: #0f0f1a; --border: #1e2030;
-      --text: #e2e8f0; --muted: #6b7280; --accent: #6ee7b7;
+      --text: #e2e8f0; --muted: #9ca3af; --accent: #6ee7b7;
     }
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { background:var(--bg); color:var(--text); font-family:'Segoe UI',sans-serif; min-height:100vh; padding:24px; }
+    body { background:var(--bg); color:var(--text); font-family:'Segoe UI',sans-serif; min-height:100vh; padding:24px; font-size:14px; }
 
     .page-title { font-size:22px; font-weight:700; color:#f87171; margin-bottom:4px; }
     .page-sub { font-size:12px; color:var(--muted); margin-bottom:28px; font-family:'Courier New',monospace; }
 
-    /* 매트릭스 */
+    /* 매트�?�� */
     .matrix-wrap {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -51,12 +51,12 @@
 
     .y-label {
       display: flex; align-items: center; justify-content: flex-end;
-      padding-right: 8px; font-size: 10px; color: var(--muted);
+      padding-right: 8px; font-size: 12px; color: var(--muted);
       font-family: 'Courier New', monospace; text-align: right; line-height: 1.3;
     }
     .x-label {
       display: flex; align-items: center; justify-content: center;
-      font-size: 10px; color: var(--muted); font-family: 'Courier New', monospace;
+      font-size: 12px; color: var(--muted); font-family: 'Courier New', monospace;
       text-align: center;
     }
     .corner { background: transparent; }
@@ -64,7 +64,7 @@
     .risk-bubble {
       width: 28px; height: 28px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 700;
+      font-size: 13px; font-weight: 700;
       cursor: pointer; transition: transform 0.15s;
       border: 2px solid rgba(255,255,255,0.15);
       color: #fff;
@@ -74,22 +74,22 @@
 
     .axis-y-title {
       writing-mode: vertical-rl; text-orientation: mixed;
-      font-size: 11px; color: var(--muted); font-family: 'Courier New', monospace;
+      font-size: 13px; color: var(--muted); font-family: 'Courier New', monospace;
       transform: rotate(180deg);
       text-align: center; margin-right: 8px; flex-shrink: 0;
     }
     .matrix-outer { display: flex; gap: 0; }
     .axis-x-title {
-      text-align: center; font-size: 11px; color: var(--muted);
+      text-align: center; font-size: 13px; color: var(--muted);
       font-family: 'Courier New', monospace; margin-top: 6px;
     }
 
-    /* 범례 */
+    /* 범�? */
     .legend-row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; }
-    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
     .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
 
-    /* 카드 리스트 */
+    /* 카드 리스??*/
     .section-title {
       font-size: 13px; font-weight: 700; color: var(--muted);
       text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;
@@ -110,20 +110,20 @@
     .rc-num {
       width: 26px; height: 26px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 700; flex-shrink: 0;
+      font-size: 13px; font-weight: 700; flex-shrink: 0;
     }
     .rc-title { font-size: 13px; font-weight: 600; }
-    .rc-category { font-size: 10px; color: var(--muted); font-family: 'Courier New', monospace; }
-    .rc-body { font-size: 12px; color: var(--muted); line-height: 1.7; }
+    .rc-category { font-size: 12px; color: var(--muted); font-family: 'Courier New', monospace; }
+    .rc-body { font-size: 13px; color: var(--muted); line-height: 1.7; }
     .rc-meta { display: flex; gap: 10px; margin-top: 8px; }
     .rc-badge {
-      font-size: 10px; padding: 2px 8px; border-radius: 4px;
+      font-size: 12px; padding: 2px 8px; border-radius: 4px;
       font-family: 'Courier New', monospace; font-weight: 600;
     }
     .rc-mitigation {
       margin-top: 8px; padding: 8px 10px;
       background: #0a1a12; border-radius: 6px; border-left: 2px solid #34d399;
-      font-size: 11px; color: #6ee7b7; line-height: 1.6;
+      font-size: 13px; color: #6ee7b7; line-height: 1.6;
       display: none;
     }
     .risk-card.active .rc-mitigation { display: block; }
@@ -138,120 +138,120 @@
       background: var(--surface); border: 1px solid var(--border);
       border-radius: 10px; padding: 14px 16px;
     }
-    .score-label { font-size: 10px; color: var(--muted); font-family: 'Courier New', monospace; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .score-label { font-size: 12px; color: var(--muted); font-family: 'Courier New', monospace; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
     .score-value { font-size: 22px; font-weight: 700; }
-    .score-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    .score-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
   </style>
 </head>
 <body>
-  <div class="page-title">⚠️ 리스크 매트릭스</div>
-  <div class="page-sub">Atomera 투자 리스크 — 확률 × 임팩트 분석 · 클릭 시 대응 전략</div>
+  <div class="page-title">?�️ 리스??매트�?��</div>
+  <div class="page-sub">Atomera ?�자 리스?????�률 × ?�팩??분석 · ?�릭 ???�???�략</div>
 
-  <!-- 요약 -->
+  <!-- ?�약 -->
   <div class="score-row" id="scoreRow"></div>
 
-  <!-- 매트릭스 -->
+  <!-- 매트�?�� -->
   <div class="matrix-wrap">
-    <div class="matrix-title">리스크 포지셔닝 매트릭스 (확률 낮음→높음 / 임팩트 낮음→높음)</div>
+    <div class="matrix-title">리스???��??�닝 매트�?�� (?�률 ??��?�높??/ ?�팩????��?�높??</div>
     <div class="matrix-outer">
-      <div class="axis-y-title">임팩트 (주가 영향) →</div>
+      <div class="axis-y-title">?�팩??(주�? ?�향) ??/div>
       <div style="flex:1">
         <div class="matrix-grid" id="matrixGrid"></div>
-        <div class="axis-x-title">← 발생 확률 →</div>
+        <div class="axis-x-title">??발생 ?�률 ??/div>
         <div class="legend-row" id="legendRow"></div>
       </div>
     </div>
   </div>
 
   <!-- 카드 -->
-  <div class="section-title">리스크 상세 분석</div>
+  <div class="section-title">리스???�세 분석</div>
   <div class="risk-cards" id="riskCards"></div>
 
 <script>
 const RISKS = [
   {
     id: 1, short: 'R1',
-    title: '삼성 GAA 계약 지연/실패',
-    category: '파이프라인 리스크',
-    prob: 3,   // 1~5 (높을수록 확률 높음)
-    impact: 5, // 1~5 (높을수록 임팩트 큼)
-    desc: '삼성이 Phase 4 평가를 완료하고도 수율·비용 문제로 MST 채택을 기각. 현재 주가 상승 기대의 핵심 드라이버가 소멸.',
-    mitigation: '三星 JDA2 계약 체결(2024) 자체가 진지한 검토 증거. 공정 전환 압박(`GAA 경쟁 심화`)이 채택 유인. Phase 4 완료 = 양산 검토 단계로 이미 진입.',
+    title: '?�성 GAA 계약 지???�패',
+    category: '?�이?�라??리스??,
+    prob: 3,   // 1~5 (?�을?�록 ?�률 ?�음)
+    impact: 5, // 1~5 (?�을?�록 ?�팩????
+    desc: '?�성??Phase 4 ?��?�??�료?�고???�율·비용 문제�?MST 채택??기각. ?�재 주�? ?�승 기�????�심 ?�라?�버가 ?�멸.',
+    mitigation: '三星 JDA2 계약 체결(2024) ?�체가 진�???검??증거. 공정 ?�환 ?�박(`GAA 경쟁 ?�화`)??채택 ?�인. Phase 4 ?�료 = ?�산 검???�계�??��? 진입.',
     color: '#f87171', bgColor: '#200a0a'
   },
   {
     id: 2, short: 'R2',
-    title: '현금 소진 / 추가 희석',
-    category: '재무 리스크',
+    title: '?�금 ?�진 / 추�? ?�석',
+    category: '?�무 리스??,
     prob: 4,
     impact: 4,
-    desc: '연간 $8~10M 연구개발비 지출. 상업 매출 본격화 전까지 분기마다 주식 발행 가능성. 2026년 $25M 자금조달 완료했으나 향후 필요 시 희석 불가피.',
-    mitigation: '2026 Q1 $25M 조달로 ~2~3년 런웨이 확보. 첫 상업매출 발생 중($50~100K). 대형 계약 체결 시 현금 우려 급감.',
+    desc: '?�간 $8~10M ?�구개발�?지�? ?�업 매출 본격???�까지 분기마다 주식 발행 가?�성. 2026??$25M ?�금조달 ?�료?�으???�후 ?�요 ???�석 불�???',
+    mitigation: '2026 Q1 $25M 조달�?~2~3???�웨???�보. �??�업매출 발생 �?$50~100K). ?�??계약 체결 ???�금 ?�려 급감.',
     color: '#fb923c', bgColor: '#1a0e00'
   },
   {
     id: 3, short: 'R3',
-    title: '기술 경쟁 열위 (대안 기술)',
-    category: '기술 리스크',
+    title: '기술 경쟁 ?�위 (?�??기술)',
+    category: '기술 리스??,
     prob: 2,
     impact: 5,
-    desc: '경쟁사(Intel, TSMC 자체 R&D)가 MST와 동등한 성능 개선을 다른 방식으로 달성. 채택 필요성 소멸.',
-    mitigation: '미국 특허 100+ 보유, IP 해자 강력. GAA 공정에서 MST는 채널 이동도 개선 방식이 비교 불가. 삼성·Intel 같은 고객이 직접 JDA를 제안한 것 자체가 기술 우위 방증.',
+    desc: '경쟁??Intel, TSMC ?�체 R&D)가 MST?�??�등???�능 개선???�른 방식?�로 ?�성. 채택 ?�요???�멸.',
+    mitigation: '미국 ?�허 100+ 보유, IP ?�자 강력. GAA 공정?�서 MST??채널 ?�동??개선 방식??비교 불�?. ?�성·Intel 같�? 고객??직접 JDA�??�안??�??�체가 기술 ?�위 방증.',
     color: '#f87171', bgColor: '#200a0a'
   },
   {
     id: 4, short: 'R4',
-    title: 'Infineon 매출 성장 정체',
-    category: '상업화 리스크',
+    title: 'Infineon 매출 ?�장 ?�체',
+    category: '?�업??리스??,
     prob: 3,
     impact: 3,
-    desc: 'Infineon GaN 라인에서 MST 적용 웨이퍼 출하량이 기대보다 느리게 증가. 초기 상업매출이 소액에 그침.',
-    mitigation: '현재 이미 매출 발생 중. Synopsys GaN PDK 통합으로 설계 생태계 확장 중. GaN 시장 자체의 구조적 성장(전기차·전력변환).',
+    desc: 'Infineon GaN ?�인?�서 MST ?�용 ?�이??출하?�이 기�?보다 ?�리�?증�?. 초기 ?�업매출???�액??그침.',
+    mitigation: '?�재 ?��? 매출 발생 �? Synopsys GaN PDK ?�합?�로 ?�계 ?�태�??�장 �? GaN ?�장 ?�체??구조???�장(?�기차·전?��???.',
     color: '#fbbf24', bgColor: '#1a1200'
   },
   {
     id: 5, short: 'R5',
-    title: '반도체 경기 침체',
-    category: '거시경제 리스크',
+    title: '반도�?경기 침체',
+    category: '거시경제 리스??,
     prob: 3,
     impact: 3,
-    desc: '반도체 다운사이클 진입 시 파운드리 CAPEX 축소, 신공정 도입 지연. 고객사 MST 채택 결정 미루기 가능.',
-    mitigation: 'IP 라이선싱 비즈니스는 설비투자 없이 계약 기반 매출. 불황기에도 기존 계약 매출 유지. 삼성 18A 경쟁 압박은 사이클 무관.',
+    desc: '반도�??�운?�이??진입 ???�운?�리 CAPEX 축소, ?�공???�입 지?? 고객??MST 채택 결정 미루�?가??',
+    mitigation: 'IP ?�이?�싱 비즈?�스???�비?�자 ?�이 계약 기반 매출. 불황기에??기존 계약 매출 ?��?. ?�성 18A 경쟁 ?�박?�??�이??무�?.',
     color: '#fbbf24', bgColor: '#1a1200'
   },
   {
     id: 6, short: 'R6',
-    title: '핵심 인력 이탈',
-    category: '운영 리스크',
+    title: '?�심 ?�력 ?�탈',
+    category: '?�영 리스??,
     prob: 2,
     impact: 4,
-    desc: 'Scott Bibaud CEO 또는 핵심 기술팀 이탈. 소수 정예 조직(직원 ~30명)에서는 충격이 큼.',
-    mitigation: 'Wei Na(전 Applied Materials) 영입(2025)으로 고객 네트워크 강화. IP·기술 자산은 회사에 귀속. 스톡옵션으로 핵심인력 유지.',
+    desc: 'Scott Bibaud CEO ?�는 ?�심 기술?�??�탈. ?�수 ?�예 조직(직원 ~30�??�서??충격????',
+    mitigation: 'Wei Na(??Applied Materials) ?�입(2025)?�로 고객 ?�트?�크 강화. IP·기술 ?�산?�??�사??귀?? ?�톡?�션?�로 ?�심?�력 ?��?.',
     color: '#fb923c', bgColor: '#1a0e00'
   },
   {
     id: 7, short: 'R7',
-    title: 'TSMC 채택 장기화',
-    category: '파이프라인 리스크',
+    title: 'TSMC 채택 ?�기??,
+    category: '?�이?�라??리스??,
     prob: 4,
     impact: 2,
-    desc: 'TSMC는 현재 Phase 1~2 초기 단계. 의사결정 구조상 외부 IP 채택에 극히 보수적. 2nm 이후로 지연 가능.',
-    mitigation: '이미 알려진 리스크. 삼성·Intel 계약 체결 시 TSMC 압박 효과. TSMC 채택은 장기 옵션으로 인식.',
+    desc: 'TSMC???�재 Phase 1~2 초기 ?�계. ?�사결정 구조???��? IP 채택??극히 보수?? 2nm ?�후�?지??가??',
+    mitigation: '?��? ?�려�?리스?? ?�성·Intel 계약 체결 ??TSMC ?�박 ?�과. TSMC 채택?�??�기 ?�션?�로 ?�식.',
     color: '#34d399', bgColor: '#0a1a10'
   },
   {
     id: 8, short: 'R8',
-    title: '특허 무효 소송',
-    category: '법률 리스크',
+    title: '?�허 무효 ?�송',
+    category: '법률 리스??,
     prob: 2,
     impact: 3,
-    desc: '대형 파운드리가 MST 특허 무효화 시도. IP 기업의 구조적 리스크.',
-    mitigation: '100+ 특허 포트폴리오로 단일 특허 의존 없음. 미국·유럽·일본 다국적 특허 등록. JDA 계약 체결 기업은 소송 유인 낮음.',
+    desc: '?�???�운?�리가 MST ?�허 무효???�도. IP 기업??구조??리스??',
+    mitigation: '100+ ?�허 ?�트?�리?�로 ?�일 ?�허 ?�존 ?�음. 미국·?�럽·?�본 ?�국???�허 ?�록. JDA 계약 체결 기업?�??�송 ?�인 ??��.',
     color: '#60a5fa', bgColor: '#0a1020'
   },
 ];
 
-// 색상 기준
+// ?�상 기�?
 function riskLevel(p, i) {
   const score = p * i;
   if (score >= 15) return 'critical';
@@ -266,40 +266,40 @@ function levelBg(level) {
   return level === 'critical' ? '#200a0a' : level === 'high' ? '#1a0e00' : level === 'medium' ? '#1a1200' : '#0a1a10';
 }
 function levelLabel(level) {
-  return level === 'critical' ? '위험' : level === 'high' ? '높음' : level === 'medium' ? '보통' : '낮음';
+  return level === 'critical' ? '?�험' : level === 'high' ? '?�음' : level === 'medium' ? '보통' : '??��';
 }
 
-// 요약 카드
+// ?�약 카드
 const levels = RISKS.map(r => riskLevel(r.prob, r.impact));
 const scoreRow = document.getElementById('scoreRow');
 const counts = {critical:0, high:0, medium:0, low:0};
 levels.forEach(l => counts[l]++);
-Object.entries({critical:'위험', high:'높음', medium:'보통', low:'낮음'}).forEach(([k, label]) => {
+Object.entries({critical:'?�험', high:'?�음', medium:'보통', low:'??��'}).forEach(([k, label]) => {
   const c = document.createElement('div');
   c.className = 'score-card';
   c.innerHTML = `
-    <div class="score-label">${label} 리스크</div>
-    <div class="score-value" style="color:${levelColor(k)}">${counts[k]}건</div>
-    <div class="score-sub">${k === 'critical' ? '즉각 모니터링' : k === 'high' ? '주의 필요' : k === 'medium' ? '관리 중' : '허용 범위'}</div>
+    <div class="score-label">${label} 리스??/div>
+    <div class="score-value" style="color:${levelColor(k)}">${counts[k]}�?/div>
+    <div class="score-sub">${k === 'critical' ? '즉각 모니?�링' : k === 'high' ? '주의 ?�요' : k === 'medium' ? '관�?�? : '?�용 범위'}</div>
   `;
   scoreRow.appendChild(c);
 });
 
-// 매트릭스 그리드
+// 매트�?�� 그리??
 const grid = document.getElementById('matrixGrid');
-// 5개 행 (임팩트 5→1), 5개 열 (확률 1→5) + y레이블
-const yLabels = ['매우 큼', '큼', '보통', '작음', '매우 작음'];
-const xLabels = ['매우 낮음', '낮음', '보통', '높음', '매우 높음'];
+// 5�???(?�팩??5??), 5�???(?�률 1??) + y?�이�?
+const yLabels = ['매우 ??, '??, '보통', '?�음', '매우 ?�음'];
+const xLabels = ['매우 ??��', '??��', '보통', '?�음', '매우 ?�음'];
 
 // 코너
 const corner = document.createElement('div'); corner.className = 'corner'; grid.appendChild(corner);
-// x 레이블 행 제목 (빈 셀)
+// x ?�이�????�목 (�??�?
 xLabels.forEach(l => {
-  // 먼저 위에 헤더 없음, 아래에 붙임
+  // 먼�? ?�에 ?�더 ?�음, ?�래??붙임
 });
 
 for (let row = 5; row >= 1; row--) {
-  // y레이블
+  // y?�이�?
   const yl = document.createElement('div');
   yl.className = 'y-label';
   yl.textContent = yLabels[5 - row];
@@ -312,7 +312,7 @@ for (let row = 5; row >= 1; row--) {
     cell.dataset.prob = col;
     cell.dataset.impact = row;
 
-    // 리스크 버블 배치
+    // 리스??버블 배치
     RISKS.forEach(r => {
       if (r.prob === col && r.impact === row) {
         const b = document.createElement('div');
@@ -330,7 +330,7 @@ for (let row = 5; row >= 1; row--) {
   }
 }
 
-// x 레이블 행
+// x ?�이�???
 const cornerB = document.createElement('div'); cornerB.className = 'x-label'; grid.appendChild(cornerB);
 xLabels.forEach(l => {
   const xl = document.createElement('div');
@@ -339,13 +339,13 @@ xLabels.forEach(l => {
   grid.appendChild(xl);
 });
 
-// 범례
+// 범�?
 const legendRow = document.getElementById('legendRow');
-[{l:'critical',t:'위험 (즉각 대응)'},{l:'high',t:'높음 (주의)'},{l:'medium',t:'보통 (관리)'},{l:'low',t:'낮음 (허용)'}].forEach(({l,t}) => {
+[{l:'critical',t:'?�험 (즉각 ?�??'},{l:'high',t:'?�음 (주의)'},{l:'medium',t:'보통 (관�?'},{l:'low',t:'??�� (?�용)'}].forEach(({l,t}) => {
   legendRow.innerHTML += `<div class="legend-item"><div class="legend-dot" style="background:${levelColor(l)}"></div><span>${t}</span></div>`;
 });
 
-// 리스크 카드
+// 리스??카드
 const cardsEl = document.getElementById('riskCards');
 RISKS.forEach(r => {
   const lv = riskLevel(r.prob, r.impact);
@@ -359,17 +359,17 @@ RISKS.forEach(r => {
         <div class="rc-title">${r.title}</div>
         <div class="rc-category">${r.category}</div>
       </div>
-      <div class="rc-arrow">▼</div>
+      <div class="rc-arrow">??/div>
     </div>
     <div class="rc-body">${r.desc}</div>
     <div class="rc-meta">
       <span class="rc-badge" style="background:${levelBg(lv)};color:${levelColor(lv)}">
-        ${levelLabel(lv)} 리스크
+        ${levelLabel(lv)} 리스??
       </span>
-      <span class="rc-badge" style="background:#12121e;color:var(--muted)">확률 ${r.prob}/5</span>
-      <span class="rc-badge" style="background:#12121e;color:var(--muted)">임팩트 ${r.impact}/5</span>
+      <span class="rc-badge" style="background:#12121e;color:var(--muted)">?�률 ${r.prob}/5</span>
+      <span class="rc-badge" style="background:#12121e;color:var(--muted)">?�팩??${r.impact}/5</span>
     </div>
-    <div class="rc-mitigation">💡 대응 전략: ${r.mitigation}</div>
+    <div class="rc-mitigation">?�� ?�???�략: ${r.mitigation}</div>
   `;
   card.onclick = () => {
     card.classList.toggle('active');
