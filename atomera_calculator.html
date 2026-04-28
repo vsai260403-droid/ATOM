@@ -369,6 +369,51 @@
   }
   .btn-preset:hover { background: rgba(124,58,237,0.15); }
 
+  /* Portfolio box */
+  .portfolio-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .pf-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .pf-stat {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .pf-stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+  .pf-stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    line-height: 1.1;
+  }
+  .pf-stat-sub {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    margin-top: 3px;
+  }
+  .pf-stat.profit .pf-stat-value { color: #34d399; }
+  .pf-stat.loss .pf-stat-value { color: #f87171; }
+  .pf-stat.neutral .pf-stat-value { color: var(--accent); }
+  .pf-divider { height: 1px; background: var(--border); margin: 14px 0; }
+
   /* Note */
   .note {
     font-size: 11px;
@@ -465,6 +510,50 @@
       <div class="breakdown-title">시총 기여 분석</div>
       <div id="breakdownRows"></div>
     </div>
+  </div>
+
+  <!-- Portfolio -->
+  <div class="portfolio-box">
+    <div class="panel-title">내 포트폴리오</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+      <div class="input-row" style="margin-bottom:0">
+        <div class="input-label">보유 주식수
+          <small>내가 보유한 주수</small>
+        </div>
+        <input type="number" id="myShares" value="" placeholder="0" min="0" step="1" style="width:120px">
+        <div class="input-unit">주</div>
+      </div>
+      <div class="input-row" style="margin-bottom:0">
+        <div class="input-label">평단가
+          <small>평균 매수 단가</small>
+        </div>
+        <input type="number" id="myAvgCost" value="" placeholder="0.00" min="0" step="0.01" style="width:120px">
+        <div class="input-unit">USD</div>
+      </div>
+    </div>
+    <div class="pf-grid" id="pfGrid" style="display:none">
+      <div class="pf-stat" id="pfCurrent">
+        <div class="pf-stat-label">현재 평가금액</div>
+        <div class="pf-stat-value" id="pfCurrentVal">—</div>
+        <div class="pf-stat-sub" id="pfCurrentSub">—</div>
+      </div>
+      <div class="pf-stat" id="pfPnl">
+        <div class="pf-stat-label">평가손익</div>
+        <div class="pf-stat-value" id="pfPnlVal">—</div>
+        <div class="pf-stat-sub" id="pfPnlSub">—</div>
+      </div>
+      <div class="pf-stat neutral" id="pfTarget">
+        <div class="pf-stat-label">목표가 도달 시 평가금액</div>
+        <div class="pf-stat-value" id="pfTargetVal">—</div>
+        <div class="pf-stat-sub" id="pfTargetSub">—</div>
+      </div>
+      <div class="pf-stat neutral" id="pfGain">
+        <div class="pf-stat-label">목표가 도달 시 수익</div>
+        <div class="pf-stat-value" id="pfGainVal">—</div>
+        <div class="pf-stat-sub" id="pfGainSub">—</div>
+      </div>
+    </div>
+    <div id="pfEmpty" style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace">보유 주식수와 평단가를 입력하면 내 수익이 계산됩니다.</div>
   </div>
 
   <div class="note">
@@ -588,6 +677,7 @@ let state = {
   basePrice: 8.60,
   selected: new Set(CONTRACTS.filter(c => c.defaultOn).map(c => c.id))
 };
+let lastTargetPrice = 8.60;
 
 // ── Init ───────────────────────────────────────────────────────
 function init() {
@@ -607,6 +697,9 @@ function init() {
     `;
     grid.appendChild(div);
   });
+
+  document.getElementById('myShares').addEventListener('input', updatePortfolio);
+  document.getElementById('myAvgCost').addEventListener('input', updatePortfolio);
 
   document.getElementById('royaltySlider').addEventListener('input', e => {
     state.royalty = parseFloat(e.target.value);
@@ -673,6 +766,7 @@ function calculate() {
 
   const totalMktcap = BASE_MKTCAP_B + totalAdd; // B
   const targetPrice = (totalMktcap * 1000) / shares;
+  lastTargetPrice = targetPrice;
   const upside = targetPrice / basePrice;
 
   // Update result
@@ -713,6 +807,67 @@ function calculate() {
   } else {
     document.getElementById('breakdownSection').style.display = 'none';
   }
+  // 포트폴리오도 함께 갱신
+  updatePortfolio();
+}
+
+function updatePortfolio() {
+  const myShares = parseFloat(document.getElementById('myShares').value);
+  const myAvg = parseFloat(document.getElementById('myAvgCost').value);
+  const currentPrice = state.basePrice;
+
+  // Use latest calculated target price
+  const targetPrice = lastTargetPrice || currentPrice;
+
+  if (!myShares || !myAvg || myShares <= 0 || myAvg <= 0) {
+    document.getElementById('pfGrid').style.display = 'none';
+    document.getElementById('pfEmpty').style.display = 'block';
+    return;
+  }
+
+  document.getElementById('pfGrid').style.display = 'grid';
+  document.getElementById('pfEmpty').style.display = 'none';
+
+  const invested = myShares * myAvg;
+  const currentVal = myShares * currentPrice;
+  const pnl = currentVal - invested;
+  const pnlPct = (pnl / invested) * 100;
+
+  const targetVal = myShares * targetPrice;
+  const targetGain = targetVal - invested;
+  const targetGainPct = (targetGain / invested) * 100;
+
+  // Current value
+  document.getElementById('pfCurrentVal').textContent = '$' + formatMoney(currentVal);
+  document.getElementById('pfCurrentSub').textContent =
+    '투자금 $' + formatMoney(invested) + ' / 주당 $' + currentPrice.toFixed(2);
+
+  // P&L
+  const pnlEl = document.getElementById('pfPnl');
+  pnlEl.className = 'pf-stat ' + (pnl >= 0 ? 'profit' : 'loss');
+  document.getElementById('pfPnlVal').textContent =
+    (pnl >= 0 ? '+' : '') + '$' + formatMoney(Math.abs(pnl));
+  document.getElementById('pfPnlSub').textContent =
+    (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(1) + '% / 평단 $' + myAvg.toFixed(2);
+
+  // Target value
+  document.getElementById('pfTargetVal').textContent = '$' + formatMoney(targetVal);
+  document.getElementById('pfTargetSub').textContent =
+    '주당 $' + formatPrice(targetPrice) + ' / ' + (targetPrice / currentPrice).toFixed(1) + '배 기준';
+
+  // Target gain
+  const gainEl = document.getElementById('pfGain');
+  gainEl.className = 'pf-stat ' + (targetGain >= 0 ? 'profit' : 'loss');
+  document.getElementById('pfGainVal').textContent =
+    (targetGain >= 0 ? '+' : '') + '$' + formatMoney(Math.abs(targetGain));
+  document.getElementById('pfGainSub').textContent =
+    (targetGainPct >= 0 ? '+' : '') + targetGainPct.toFixed(1) + '% 수익';
+}
+
+function formatMoney(v) {
+  if (v >= 1000000) return (v / 1000000).toFixed(2) + 'M';
+  if (v >= 1000) return (v / 1000).toFixed(1) + 'K';
+  return v.toFixed(2);
 }
 
 function formatPrice(v) {
