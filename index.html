@@ -134,6 +134,14 @@
     </div>
 
     <div class="tab active" onclick="switchTab(0)" id="btn-0">
+      <span class="tab-icon">🧬</span>
+      <div>
+        <div class="tab-label">MST 기술</div>
+        <div class="tab-sub">핵심 기술 개요</div>
+      </div>
+    </div>
+
+    <div class="tab" onclick="switchTab(1)" id="btn-1">
       <span class="tab-icon">&#128197;</span>
       <div>
         <div class="tab-label">이벤트 타임라인</div>
@@ -141,7 +149,7 @@
       </div>
     </div>
 
-    <div class="tab" onclick="switchTab(1)" id="btn-1">
+    <div class="tab" onclick="switchTab(2)" id="btn-2">
       <span class="tab-icon">📊</span>
       <div>
         <div class="tab-label">파이프라인</div>
@@ -149,7 +157,7 @@
       </div>
     </div>
 
-    <div class="tab" onclick="switchTab(2)" id="btn-2">
+    <div class="tab" onclick="switchTab(3)" id="btn-3">
       <span class="tab-icon">🗓️</span>
       <div>
         <div class="tab-label">분기별 로드맵</div>
@@ -157,7 +165,7 @@
       </div>
     </div>
 
-    <div class="tab" onclick="switchTab(3)" id="btn-3">
+    <div class="tab" onclick="switchTab(4)" id="btn-4">
       <span class="tab-icon">🧮</span>
       <div>
         <div class="tab-label">시나리오 계산기</div>
@@ -165,7 +173,7 @@
       </div>
     </div>
 
-    <div class="tab" onclick="switchTab(4)" id="btn-4">
+    <div class="tab" onclick="switchTab(5)" id="btn-5">
       <span class="tab-icon">📊</span>
       <div>
         <div class="tab-label">PSR 비교</div>
@@ -173,7 +181,7 @@
       </div>
     </div>
 
-    <div class="tab" onclick="switchTab(5)" id="btn-5">
+    <div class="tab" onclick="switchTab(6)" id="btn-6">
       <span class="tab-icon">⚠️</span>
       <div>
         <div class="tab-label">리스크 매트릭스</div>
@@ -181,7 +189,7 @@
       </div>
     </div>
 
-    <div class="tab" onclick="switchTab(6)" id="btn-6">
+    <div class="tab" onclick="switchTab(7)" id="btn-7">
       <span class="tab-icon">🔬</span>
       <div>
         <div class="tab-label">웨이퍼 경제성</div>
@@ -193,25 +201,28 @@
   <!-- 패널 (iframe) -->
   <div class="panels">
     <div class="panel active" id="panel-0">
-      <iframe src="atomera_timeline.html" id="frame-0"></iframe>
+      <iframe src="atomera_mst.html" id="frame-0"></iframe>
     </div>
     <div class="panel" id="panel-1">
-      <iframe src="atomera_pipeline.html" id="frame-1" loading="lazy"></iframe>
+      <iframe src="atomera_timeline.html" id="frame-1" loading="lazy"></iframe>
     </div>
     <div class="panel" id="panel-2">
-      <iframe src="atomera_roadmap.html" id="frame-2" loading="lazy"></iframe>
+      <iframe src="atomera_pipeline.html" id="frame-2" loading="lazy"></iframe>
     </div>
     <div class="panel" id="panel-3">
-      <iframe src="atomera_calculator.html" id="frame-3" loading="lazy"></iframe>
+      <iframe src="atomera_roadmap.html" id="frame-3" loading="lazy"></iframe>
     </div>
     <div class="panel" id="panel-4">
-      <iframe src="atomera_compare.html" id="frame-4" loading="lazy"></iframe>
+      <iframe src="atomera_calculator.html" id="frame-4" loading="lazy"></iframe>
     </div>
     <div class="panel" id="panel-5">
-      <iframe src="atomera_risk.html" id="frame-5" loading="lazy"></iframe>
+      <iframe src="atomera_compare.html" id="frame-5" loading="lazy"></iframe>
     </div>
     <div class="panel" id="panel-6">
-      <iframe src="atomera_wafer.html" id="frame-6" loading="lazy"></iframe>
+      <iframe src="atomera_risk.html" id="frame-6" loading="lazy"></iframe>
+    </div>
+    <div class="panel" id="panel-7">
+      <iframe src="atomera_wafer.html" id="frame-7" loading="lazy"></iframe>
     </div>
   </div>
 
