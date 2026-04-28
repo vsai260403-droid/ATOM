@@ -1409,11 +1409,12 @@
       </div>
       <!-- Scenario Table -->
       <div class="val-item" style="grid-column: 1 / -1;">
-        <div class="val-company">📊 계약 단계별 주가 시나리오 — "계약 성사 시 주가는 얼마?" (37M주 기준)</div>
+        <div class="val-company">📊 계약 단계별 주가 시나리오 — "계약 성사 시 주가는 얼마?" (37M주 기준, 진행 단계 순)</div>
         <table class="scenario-table">
           <thead>
             <tr>
               <th>시나리오</th>
+              <th>현재 단계</th>
               <th>추가 시총</th>
               <th>누적 시총</th>
               <th>주가 (로열티 0.5%)</th>
@@ -1424,58 +1425,73 @@
           <tbody>
             <tr>
               <td class="sc-name">현재 (기준)</td>
+              <td class="sc-note">STM·Infineon 계약 완료</td>
               <td class="sc-note">—</td>
               <td class="sc-note">~$0.2B</td>
               <td class="sc-price">$5</td>
               <td class="sc-price">$5</td>
               <td class="sc-mult">1x</td>
             </tr>
-            <tr>
-              <td class="sc-name">① TSMC 계약</td>
-              <td class="sc-note">+$6.4B ~ $12.8B</td>
-              <td class="sc-note">~$6.6B</td>
-              <td class="sc-price">~$178</td>
-              <td class="sc-price">~$351</td>
-              <td class="sc-mult">36x ~ 70x</td>
-            </tr>
-            <tr>
-              <td class="sc-name">② + 삼성 + 인텔</td>
-              <td class="sc-note">+$1.58B ~ $3.2B</td>
-              <td class="sc-note">~$8.2B</td>
-              <td class="sc-price">~$222</td>
-              <td class="sc-price">~$443</td>
-              <td class="sc-mult">44x ~ 89x</td>
-            </tr>
             <tr class="sc-highlight">
-              <td class="sc-name">③ + DRAM 1개사 (Micron)</td>
-              <td class="sc-note">+$7B (시장 35% × 0.5% × 40)</td>
-              <td class="sc-note">~$15B</td>
-              <td class="sc-price">~$405</td>
-              <td class="sc-price">~$811</td>
-              <td class="sc-mult">81x ~ 162x</td>
+              <td class="sc-name">① 삼성 GAA 계약</td>
+              <td class="sc-note" style="color:#a78bfa">Phase 4 진행 중 ← 최근접</td>
+              <td class="sc-note">+$0.9B ~ $1.8B</td>
+              <td class="sc-note">~$1.1B</td>
+              <td class="sc-price">~$30</td>
+              <td class="sc-price">~$54</td>
+              <td class="sc-mult">6x ~ 11x</td>
             </tr>
             <tr>
-              <td class="sc-name">④ + DRAM 전체</td>
-              <td class="sc-note">+$20B ~ $40B</td>
+              <td class="sc-name">② + 인텔 GAA 계약</td>
+              <td class="sc-note" style="color:#fbbf24">대규모 평가 중</td>
+              <td class="sc-note">+$0.68B ~ $1.4B</td>
+              <td class="sc-note">~$1.8B</td>
+              <td class="sc-price">~$49</td>
+              <td class="sc-price">~$92</td>
+              <td class="sc-mult">10x ~ 18x</td>
+            </tr>
+            <tr>
+              <td class="sc-name">③ + DRAM 1개사 (Micron)</td>
+              <td class="sc-note" style="color:#fbbf24">DRAM 평가 중</td>
+              <td class="sc-note">+$7B (시장 35% × 0.5% × 40)</td>
+              <td class="sc-note">~$8.8B</td>
+              <td class="sc-price">~$238</td>
+              <td class="sc-price">~$449</td>
+              <td class="sc-mult">48x ~ 90x</td>
+            </tr>
+            <tr>
+              <td class="sc-name">④ + TSMC GAA 계약</td>
+              <td class="sc-note" style="color:#60a5fa">초기 단계 ← 가장 느림</td>
+              <td class="sc-note">+$6.4B ~ $12.8B</td>
+              <td class="sc-note">~$15.2B</td>
+              <td class="sc-price">~$411</td>
+              <td class="sc-price">~$795</td>
+              <td class="sc-mult">82x ~ 159x</td>
+            </tr>
+            <tr>
+              <td class="sc-name">⑤ + DRAM 전체</td>
+              <td class="sc-note">Micron 외 삼성·SK Hynix</td>
+              <td class="sc-note">+$13B ~ $26B</td>
               <td class="sc-note">~$28B</td>
               <td class="sc-price">~$757</td>
-              <td class="sc-price">~$1,514</td>
-              <td class="sc-mult">151x ~ 303x</td>
+              <td class="sc-price">~$1,495</td>
+              <td class="sc-mult">151x ~ 299x</td>
             </tr>
             <tr>
-              <td class="sc-name">⑤ + Power/RF/GaN</td>
+              <td class="sc-name">⑥ + Power/RF/GaN</td>
+              <td class="sc-note">Infineon 이미 상업 매출</td>
               <td class="sc-note">+$0.4B ~ $1.2B</td>
               <td class="sc-note">~$29B</td>
               <td class="sc-price">~$784</td>
-              <td class="sc-price">~$1,546</td>
-              <td class="sc-mult">157x ~ 309x</td>
+              <td class="sc-price">~$1,528</td>
+              <td class="sc-mult">157x ~ 306x</td>
             </tr>
           </tbody>
         </table>
         <div style="font-size:11px;color:#4b6280;font-family:'DM Mono',monospace;margin-top:10px;line-height:1.8">
+          ※ 순서는 현재 계약 진행 단계 기준 — 삼성(Phase 4) → 인텔(평가) → DRAM → TSMC(초기) 순<br>
           ※ 0.5% 열: 보수적 기본 시나리오 / 1% 열: 기술 확산 시 낙관 시나리오<br>
-          ※ 주식수 37M주 기준 — 유상증자 발생 시 희석 (50~60M주 가정 시 약 30~40% 하향 조정)<br>
-          ※ 각 시나리오는 해당 계약이 성사된다고 가정했을 때의 이론치. 확률 할인 미반영
+          ※ 주식수 37M주 기준 — 유상증자 발생 시 희석 (50~60M주 시 약 30~40% 하향)
         </div>
       </div>
     </div>
