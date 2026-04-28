@@ -158,22 +158,24 @@
   .pipeline-stages {
     display: flex;
     align-items: flex-start;
-    gap: 0;
+    gap: 8px;
     margin-bottom: 48px;
     overflow-x: auto;
-    padding: 28px 24px;
+    padding: 28px 20px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 12px;
+    -webkit-overflow-scrolling: touch;
   }
 
   .stage-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    flex: 1;
-    min-width: 100px;
+    gap: 6px;
+    flex: 0 0 auto;
+    min-width: 140px;
+    max-width: 160px;
     position: relative;
   }
 
@@ -216,7 +218,7 @@
   }
 
   .stage-name {
-    font-size: 13px;
+    font-size: 11px;
     color: #cbd5e1;
     text-align: center;
     font-family: 'DM Mono', monospace;
@@ -225,20 +227,22 @@
   }
 
   .stage-desc {
-    font-size: 12px;
+    font-size: 10.5px;
     color: #e2e8f0;
     text-align: center;
-    line-height: 1.5;
+    line-height: 1.45;
     font-weight: 500;
+    word-break: keep-all;
   }
 
   .stage-detail {
-    font-size: 11px;
+    font-size: 10px;
     color: #94a3b8;
     text-align: center;
-    line-height: 1.6;
-    max-width: 130px;
-    margin-top: 4px;
+    line-height: 1.55;
+    max-width: 140px;
+    margin-top: 2px;
+    word-break: keep-all;
   }
 
   /* Section title */
@@ -863,7 +867,7 @@
 
   @media (max-width: 640px) {
     .cards-grid { grid-template-columns: 1fr; }
-    .pipeline-stages { gap: 0; }
+    .pipeline-stages { gap: 6px; }
     /* Mobile: hide table, show scroll cards */
     .scenario-table { display: none !important; }
     .sc-scroll { display: flex !important; }
