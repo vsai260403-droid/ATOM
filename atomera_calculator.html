@@ -500,7 +500,11 @@
 
   <!-- Contracts -->
   <div class="panel">
-    <div class="panel-title">계약 선택 (클릭하여 ON/OFF)</div>
+    <div class="panel-title">Phase 6 (양산 풀램프) 달성 시 시나리오</div>
+    <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:14px;line-height:1.6">
+      각 회사가 <strong style="color:var(--accent)">Phase 6 (상업 양산 풀램프)</strong>에 도달했을 때의 시총 기여를 계산합니다.<br>
+      STM·Infineon은 현재 Phase 4~5 (초기 매출) 단계로, 풀램프까지 추가 성장 여지가 있습니다.
+    </div>
     <div class="contracts-grid" id="contractsGrid">
       <!-- contracts injected by JS -->
     </div>
@@ -572,31 +576,37 @@ const CONTRACTS = [
   {
     id: 'stm',
     name: 'STM (Power)',
-    stage: '✅ Phase 4 완료 · 상업 매출',
+    currentPhase: 'Phase 4~5 · 초기 상업매출',
+    phaseColor: '#10b981',
+    stage: 'Phase 6 양산 풀램프 달성 시',
     stageColor: '#10b981',
     activeClass: 'active-green',
-    market: 3,      // $3B 전력 매출
-    share: 1.0,     // 100% 기준
+    market: 3,
+    share: 1.0,
     defaultOn: true,
     barColor: '#10b981',
-    note: '전력 반도체 $3B × 로열티율 × PSR'
+    note: '전력 반도체 $3B × 로열티율 × PSR (풀램프 기준)'
   },
   {
     id: 'infineon',
     name: 'Infineon (Power)',
-    stage: '✅ 상업 매출 발생 중',
+    currentPhase: 'Phase 4~5 · GaN 상업매출',
+    phaseColor: '#10b981',
+    stage: 'Phase 6 양산 풀램프 달성 시',
     stageColor: '#10b981',
     activeClass: 'active-green',
     market: 5,
     share: 0.20,
     defaultOn: true,
     barColor: '#10b981',
-    note: 'Power $5B × 침투율 20% × 로열티율 × PSR'
+    note: 'Power $5B × 침투율 20% × 로열티율 × PSR (풀램프 기준)'
   },
   {
     id: 'samsung',
     name: 'Samsung GAA',
-    stage: '🟣 Phase 4 진행 중 ← 최근접',
+    currentPhase: 'Phase 4 진행 중 ← 최근접',
+    phaseColor: '#a78bfa',
+    stage: 'Phase 6 양산 계약 달성 시',
     stageColor: '#a78bfa',
     activeClass: 'active',
     market: 15,
@@ -608,7 +618,9 @@ const CONTRACTS = [
   {
     id: 'intel',
     name: 'Intel GAA (18A)',
-    stage: '🟡 대규모 평가 중',
+    currentPhase: 'Phase 3~4 · 대규모 평가 중',
+    phaseColor: '#f59e0b',
+    stage: 'Phase 6 양산 계약 달성 시',
     stageColor: '#f59e0b',
     activeClass: 'active-yellow',
     market: 17,
@@ -620,8 +632,10 @@ const CONTRACTS = [
   {
     id: 'micron',
     name: 'Micron (DRAM)',
-    stage: '🟡 DRAM 평가 중',
-    stageColor: '#f59e0b',
+    currentPhase: 'Phase 3 · DRAM 평가 중',
+    phaseColor: '#f59e0b',
+    stage: 'Phase 6 양산 계약 달성 시',
+    stageColor: '#60a5fa',
     activeClass: 'active-yellow',
     market: 100,
     share: 0.35,
@@ -632,7 +646,9 @@ const CONTRACTS = [
   {
     id: 'tsmc',
     name: 'TSMC GAA (2nm)',
-    stage: '🔵 초기 단계 ← 가장 느림',
+    currentPhase: 'Phase 1~2 · 초기 단계',
+    phaseColor: '#60a5fa',
+    stage: 'Phase 6 양산 계약 달성 시',
     stageColor: '#60a5fa',
     activeClass: 'active-blue',
     market: 160,
@@ -644,7 +660,9 @@ const CONTRACTS = [
   {
     id: 'dram_rest',
     name: 'DRAM 전체 (삼성·SK)',
-    stage: '🔵 장기 시나리오',
+    currentPhase: 'Phase 1~2 · 장기 시나리오',
+    phaseColor: '#60a5fa',
+    stage: 'Phase 6 양산 계약 달성 시',
     stageColor: '#60a5fa',
     activeClass: 'active-blue',
     market: 100,
@@ -656,7 +674,9 @@ const CONTRACTS = [
   {
     id: 'gf',
     name: 'GlobalFoundries',
-    stage: '🟡 평가 중',
+    currentPhase: 'Phase 3 · 평가 중',
+    phaseColor: '#f59e0b',
+    stage: 'Phase 6 양산 계약 달성 시',
     stageColor: '#f59e0b',
     activeClass: 'active-yellow',
     market: 7,
@@ -691,6 +711,7 @@ function init() {
       <div class="contract-check" id="check-${c.id}">${state.selected.has(c.id) ? '✓' : ''}</div>
       <div class="contract-info">
         <div class="contract-name">${c.name}</div>
+        <div class="contract-stage" style="color:${c.phaseColor};font-size:10px">현재: ${c.currentPhase}</div>
         <div class="contract-stage" style="color:${c.stageColor}">${c.stage}</div>
         <div class="contract-contribution" id="contrib-${c.id}">계산 중...</div>
       </div>
