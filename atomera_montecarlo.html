@@ -682,14 +682,17 @@ function runSimulation() {
     const elapsed = '완료';
     status.textContent = `✅ ${N.toLocaleString()}회 시뮬레이션 ${elapsed}`;
 
-    renderSummary(S0);
-    renderHistogram(S0);
-    renderPaths(S0);
-    renderProbTable(S0);
-
-    // 패널 표시
+    // 패널을 먼저 표시 (canvas가 크기를 가져야 그릴 수 있음)
     ['summaryRow','histPanel','pathPanel','tablePanel'].forEach(id => {
       document.getElementById(id).style.display = '';
+    });
+
+    // 약간의 지연 후 렌더 (DOM 레이아웃 반영 대기)
+    requestAnimationFrame(() => {
+      renderSummary(S0);
+      renderHistogram(S0);
+      renderPaths(S0);
+      renderProbTable(S0);
     });
   }, 50);
 }
