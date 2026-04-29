@@ -283,9 +283,6 @@
     ※ 연매출은 최근 분기 공개 데이터 기준 (분기 1회 업데이트)<br>
     ※ PSR = 실시간 시가총액 ÷ 연매출 (TTM)
   </div>
-  <div style="text-align:center;margin-top:8px">
-    <button id="compareRefreshBtn" onclick="refreshAll()" style="background:#1e2d45;border:1px solid #334155;color:#94a3b8;padding:6px 16px;border-radius:6px;font-size:12px;cursor:pointer;font-family:'DM Mono',monospace">⟳ 실시간 시총 새로고침</button>
-  </div>
 
 <script>
 // ── 기업 데이터 (revenue = TTM 연매출 $B, mktcap = 폴백값 $B) ──
@@ -349,22 +346,30 @@ function renderTable(data) {
   tbody.innerHTML = '';
   data.forEach(c => {
     const psrTxt  = c.psr !== null ? c.psr.toFixed(1) + 'x' : '—';
+    const mktTxt  = c.mktcap !== null ? fmt(c.mktcap) : '<span style="color:#f59e0b">--</span>';
     const barPct  = c.psr !== null ? Math.min(c.psr / maxPSRScale * 100, 100) : 0;
     const ratio   = c.psr !== null && c.ticker !== 'ATOM'
                     ? (c.psr / atomPSR).toFixed(1) + 'x ↑' : '—';
     const hl      = (c.ticker === 'RMBS' || c.ticker === 'ATOM') ? 'highlight' : '';
     const psrColor= c.psr > 20 ? 'var(--purple)' : c.psr > 8 ? 'var(--yellow)' : 'var(--muted)';
-    const liveTag = c.live ? '<span style="font-size:9px;color:#34d399;margin-left:4px">●LIVE</span>'
-                           : '<span style="font-size:9px;color:#64748b;margin-left:4px">○폴백</span>';
+    const btnId   = 'btn-' + c.ticker.replace('—','mpeg');
+    const btnStyle = c.live
+      ? 'background:none;border:none;color:#34d399;font-size:10px;cursor:default;padding:0 2px'
+      : 'background:#1e2d45;border:1px solid #f59e0b;color:#f59e0b;font-size:10px;cursor:pointer;padding:1px 5px;border-radius:3px;font-family:inherit';
+    const btnTxt  = c.live ? '✓' : '⟳';
+    const btnClick = c.live ? '' : `onclick="retryOne('${c.ticker}')"`;
     tbody.innerHTML += `
       <tr class="${hl}">
         <td>
           <div class="company-name">${c.name}</div>
-          <div class="company-ticker">${c.ticker}${liveTag}</div>
+          <div class="company-ticker" style="display:flex;align-items:center;gap:4px">
+            ${c.ticker}
+            <button id="${btnId}" ${btnClick} style="${btnStyle}">${btnTxt}</button>
+          </div>
           <div class="company-type"><span class="tag ${tagClass(c.type)}">${c.typeLabel}</span></div>
         </td>
         <td style="font-size:11px;color:var(--muted);max-width:160px">${c.note}</td>
-        <td class="num">${fmt(c.mktcap)}</td>
+        <td class="num">${mktTxt}</td>
         <td class="num">${fmt(c.revenue)}</td>
         <td class="num" style="font-weight:700;color:${psrColor}">${psrTxt}</td>
         <td class="psr-bar-cell">
@@ -430,6 +435,23 @@ function initScaffold() {
 // fetch 전 초기 상태: mktcap=null, psr=null, live=false
 let fetchedData = COMPANIES.map(c => ({ ...c, mktcap: null, psr: null, live: false }));
 
+// ── 단일 종목 재시도 ──
+async function retryOne(ticker) {
+  const btnId = 'btn-' + ticker.replace('—','mpeg');
+  const btn = document.getElementById(btnId);
+  if (btn) { btn.textContent = '...'; btn.disabled = true; }
+  const liveCap = await fetchMktcap(ticker);
+  const idx = fetchedData.findIndex(c => c.ticker === ticker);
+  if (idx === -1) return;
+  if (liveCap !== null) {
+    fetchedData[idx] = { ...fetchedData[idx], mktcap: liveCap, psr: calcPSR(liveCap, fetchedData[idx].revenue), live: true };
+  }
+  renderTable(fetchedData);
+  renderScatter(fetchedData);
+  updateSummary(fetchedData);
+  updateNote(fetchedData);
+}
+
 async function refreshAll() {
   const btn = document.getElementById('compareRefreshBtn');
   if (btn) { btn.textContent = '⟳ 로딩 중...'; btn.disabled = true; }
@@ -453,8 +475,11 @@ async function refreshAll() {
   fetchedData = results;
   renderTable(results);
   renderScatter(results);
+  updateSummary(results);
+  updateNote(results);
+}
 
-  // 요약 카드 — Atomera PSR 업데이트
+function updateSummary(results) {
   const atom = results.find(c => c.ticker === 'ATOM');
   const sumVal = document.querySelector('.sum-card:nth-child(1) .sum-value');
   const sumSub = document.querySelector('.sum-card:nth-child(1) .sum-sub');
@@ -463,51 +488,18 @@ async function refreshAll() {
     if (sumSub) sumSub.textContent = '시총 ' + fmt(atom.mktcap) + ' / 매출 ' + fmt(atom.revenue);
   } else {
     if (sumVal) sumVal.textContent = '--';
-    if (sumSub) sumSub.textContent = '실시간 fetch 실패 · 재시도 버튼 클릭';
-  }
-
-  const liveCount = results.filter(c => c.live).length;
-  const total     = results.filter(c => c.ticker !== '—').length;
-  const failCount = total - liveCount;
-  const ts        = new Date().toLocaleTimeString('ko-KR', { hour:'2-digit', minute:'2-digit' });
-  document.getElementById('compareNote').innerHTML =
-    `※ 시가총액 실시간 반영 ${liveCount}/${total}개 · ${ts} 기준 (Yahoo Finance)<br>
-     ※ ●LIVE = 실시간 시총 · ○폴백 = fetch 실패 (-- 표시)<br>
-     ※ 연매출은 최근 분기 공개 데이터 기준 · PSR = 실시간 시총 ÷ 연매출`;
-
-  if (btn) {
-    if (liveCount === 0) {
-      btn.textContent = '⟳ 재시도'; btn.style.color = '#f59e0b';
-    } else if (failCount > 0) {
-      btn.textContent = `⚠ ${liveCount}/${total} LIVE · 재시도`; btn.style.color = '#f59e0b';
-    } else {
-      btn.textContent = `✓ ${liveCount}/${total} LIVE`; btn.style.color = '#34d399';
-    }
-    btn.disabled = false;
-  }
-
-  // 실패 항목이 있으면 note 안에도 재시도 버튼 인라인 표시
-  const noteEl = document.getElementById('compareNote');
-  if (noteEl) {
-    const retryInline = noteEl.querySelector('.inline-retry');
-    if (failCount > 0) {
-      if (!retryInline) {
-        const rb = document.createElement('button');
-        rb.className = 'inline-retry';
-        rb.textContent = `⟳ 실패 ${failCount}개 재시도`;
-        rb.onclick = refreshAll;
-        rb.style.cssText = 'margin-left:8px;background:#1e2d45;border:1px solid #f59e0b;color:#f59e0b;padding:2px 10px;border-radius:4px;font-size:11px;cursor:pointer;font-family:inherit;vertical-align:middle';
-        noteEl.appendChild(rb);
-      } else {
-        retryInline.textContent = `⟳ 실패 ${failCount}개 재시도`;
-      }
-    } else if (retryInline) {
-      retryInline.remove();
-    }
+    if (sumSub) sumSub.textContent = '⟳ 주가 로딩 실패 — 해당 행 버튼 클릭';
   }
 }
 
-// ── 초기화 ──
+function updateNote(results) {
+  const liveCount = results.filter(c => c.live).length;
+  const total     = results.filter(c => c.ticker !== '—').length;
+  const ts        = new Date().toLocaleTimeString('ko-KR', { hour:'2-digit', minute:'2-digit' });
+  document.getElementById('compareNote').innerHTML =
+    `※ 실시간 반영 ${liveCount}/${total}개 · ${ts} 기준 (Yahoo Finance) · ⟳ = 실패 항목 재시도<br>
+     ※ 연매출은 최근 분기 공개 데이터 기준 · PSR = 실시간 시총 ÷ 연매출`;
+}
 initScaffold();
 renderTable(fetchedData);   // -- 상태로 즉시 렌더
 renderScatter(fetchedData);
