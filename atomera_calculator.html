@@ -489,6 +489,7 @@
       </div>
       <input type="number" id="basePriceInput" value="8.60" min="0.01" max="9999" step="0.01">
       <div class="input-unit">USD</div>
+      <button id="calcRefreshBtn" onclick="refreshCalcPrice()" title="Yahoo Finance 실시간 조회" style="margin-left:8px;background:#1e2d45;border:1px solid #334155;color:#9ca3af;font-size:11px;padding:4px 12px;border-radius:6px;cursor:pointer;font-family:'DM Mono',monospace;white-space:nowrap">⟳ 실시간</button>
     </div>
 
     <div class="btn-row">
@@ -564,7 +565,7 @@
   <div class="note">
     ※ 산출 공식: 시장규모 × 해당시장비중 × 로열티율 × PSR배수 = 시총 기여 추정치<br>
     ※ 주가 = (현재 시총 + 선택 계약 시총 합산) ÷ 유통 주식수<br>
-    ※ 현재 주가 $8.60 / 시총 $295M 기준 (Yahoo Finance 2026.04.28) / 투자 참고용 추정치이며 실제와 다를 수 있음
+    <span id="calcLiveNote">※ 현재 주가 $8.60 / 시총 $295M 기준 (Yahoo Finance 2026.04.28)</span> / 투자 참고용 추정치이며 실제와 다를 수 있음
   </div>
 
 </div>
@@ -638,11 +639,11 @@ const CONTRACTS = [
     stage: 'Phase 6 양산 계약 달성 시',
     stageColor: '#60a5fa',
     activeClass: 'active-yellow',
-    market: 100,
-    share: 0.35,
+    market: 25,
+    share: 0.25,
     defaultOn: false,
     barColor: '#60a5fa',
-    note: 'DRAM $100B × Micron점유 35% × 로열티율 × PSR'
+    note: 'Micron 연매출 $25B × DRAM 1C/1D 노드 적용 비중 25% × 로열티율 × PSR'
   },
   {
     id: 'tsmc',
@@ -666,11 +667,11 @@ const CONTRACTS = [
     stage: 'Phase 6 양산 계약 달성 시',
     stageColor: '#60a5fa',
     activeClass: 'active-blue',
-    market: 100,
-    share: 0.65,
+    market: 38,
+    share: 0.30,
     defaultOn: false,
     barColor: '#60a5fa',
-    note: 'DRAM $100B × 나머지 65% × 로열티율 × PSR'
+    note: '삼성+SK하이닉스 DRAM 합산 $38B × 적용 노드 비중 30% × 로열티율 × PSR'
   },
   {
     id: 'gf',
@@ -950,6 +951,42 @@ function resetAll() {
 }
 
 init();
+
+// ── 실시간 주가 (Yahoo Finance via allorigins proxy) ──
+const CALC_FALLBACK = { price: 8.60, mktcapM: 295 };
+async function fetchCalcLive() {
+  const proxy = 'https://api.allorigins.win/get?url=';
+  const url = 'https://query1.finance.yahoo.com/v8/finance/chart/ATOM?interval=1d&range=1d';
+  try {
+    const r = await fetch(proxy + encodeURIComponent(url), { signal: AbortSignal.timeout(6000) });
+    const j = await r.json();
+    const m = JSON.parse(j.contents).chart.result[0].meta;
+    return {
+      price: m.regularMarketPrice || m.regularMarketPreviousClose || CALC_FALLBACK.price,
+      mktcapM: m.marketCap ? Math.round(m.marketCap / 1e6 * 10) / 10 : CALC_FALLBACK.mktcapM,
+      live: true
+    };
+  } catch(e) { return { ...CALC_FALLBACK, live: false }; }
+}
+async function refreshCalcPrice() {
+  const btn = document.getElementById('calcRefreshBtn');
+  if (btn) { btn.textContent = '⟳ 로딩...'; btn.disabled = true; }
+  const d = await fetchCalcLive();
+  const inp = document.getElementById('basePriceInput');
+  if (inp) {
+    inp.value = d.price.toFixed(2);
+    state.basePrice = d.price;
+    calculate();
+  }
+  const src = d.live
+    ? ('실시간 · ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit',minute:'2-digit'}))
+    : 'Yahoo Finance 2026.04.28 (캐시)';
+  const note = document.getElementById('calcLiveNote');
+  if (note) note.textContent = '※ 현재 주가 $' + d.price.toFixed(2) + ' / 시총 $' + d.mktcapM + 'M 기준 (' + src + ')';
+  if (btn) { btn.textContent = d.live ? '✓ 실시간' : '✗ 캐시'; btn.disabled = false;
+             btn.style.color = d.live ? '#34d399' : '#f59e0b'; }
+}
+refreshCalcPrice();
 </script>
 </body>
 </html>

@@ -889,16 +889,17 @@
     <div class="header-label">ATOMERA INC. (NASDAQ: ATOM) — CUSTOMER PIPELINE TRACKER</div>
     <h1>고객사 계약 현황</h1>
     <div class="header-meta">
-      <div class="meta-item">기준일<span>2026년 4월 28일</span></div>
-      <div class="meta-item">출처<span>어반라이프인서울 #6~10</span></div>
-      <div class="meta-item">총 고객<span>10개사 (추정 포함)</span></div>
+      <div class="meta-item">기준일<span>2026년 4월 29일</span></div>
+      <div class="meta-item">출처<span>어반라이프인서울 #1~10</span></div>
+      <div class="meta-item">총 파이프라인<span>26개 / 21개사 (2Q25 기준)</span></div>
     </div>
     <div class="header-meta" style="margin-top:10px;padding-top:10px;border-top:1px solid #1e2d45;font-size:13px">
-      <div class="meta-item">현재가 (Prev. Close)<span style="color:#00d4ff;font-family:'Bebas Neue',sans-serif;font-size:18px">$8.60</span></div>
-      <div class="meta-item">시가총액<span style="color:#a78bfa">$295.5M</span></div>
-      <div class="meta-item">52주 범위<span>$1.89 ~ $9.59</span></div>
+      <div class="meta-item">현재가 (Prev. Close)<span id="plLivePrice" style="color:#00d4ff;font-family:'Bebas Neue',sans-serif;font-size:18px">$8.60</span></div>
+      <div class="meta-item">시가총액<span id="plLiveMktcap" style="color:#a78bfa">$295.5M</span></div>
+      <div class="meta-item">52주 범위<span id="plLive52w">$1.89 ~ $9.59</span></div>
       <div class="meta-item">유통주식수<span>~34.4M주</span></div>
-      <div class="meta-item">소스<span style="color:#64748b">Yahoo Finance 2026.04.28</span></div>
+      <div class="meta-item">소스<span id="plLiveSrc" style="color:#64748b">Yahoo Finance 2026.04.28</span></div>
+      <div class="meta-item"><button id="plRefreshBtn" onclick="refreshAtomPrice()" style="background:#1e2d45;border:1px solid #334155;color:#9ca3af;font-size:10px;padding:3px 10px;border-radius:4px;cursor:pointer;font-family:'DM Mono',monospace;letter-spacing:0.05em">⟳ 실시간</button></div>
     </div>
   </div>
 
@@ -968,8 +969,8 @@
 
   <!-- Section: 공식 계약 -->
   <div class="section-title">
-    공식 계약 (Phase 4 — JDA)
-    <span class="count-badge">2개사</span>
+    공식 계약 (Phase 4 JDA · 파운드리 라이선스)
+    <span class="count-badge">3개사</span>
   </div>
   <div class="cards-grid">
 
@@ -1048,7 +1049,7 @@
         </div>
         <div class="info-row">
           <span class="info-label">최근 동향</span>
-          <span class="info-value" style="color:#34d399">장비 파트너와 신규 진전<br>GAA 평가 지속 중</span>
+          <span class="info-value" style="color:#34d399">장비 파트너와 신규 진전<br>Epi 공정 직원 Atomera 이직<br>한국어 PM 채용 진행 중</span>
         </div>
         <div class="info-row">
           <span class="info-label">고객명 공개</span>
@@ -1059,6 +1060,48 @@
         <span class="potential-label">GAA 양산 계약 시 시총 기여</span>
         <span class="potential-value">~ $700M</span>
       </div>
+    </div>
+
+    <!-- Tower Semiconductor -->
+    <div class="card phase4">
+      <div class="card-header">
+        <div>
+          <div class="company-name">Tower Semi</div>
+          <div class="company-sub">미국 특화 파운드리 (TSEM) / 구 JazzSemi</div>
+        </div>
+        <span class="status-badge badge-phase4">Foundry 라이센스</span>
+      </div>
+      <div class="phase-track">
+        <div class="phase-track-label">
+          <span>진행 단계</span>
+          <span>MSTcad 라이센스 형태</span>
+        </div>
+        <div class="phase-bar"><div class="phase-fill" style="background:linear-gradient(90deg,var(--green),#34d399);width:55%"></div></div>
+      </div>
+      <div class="info-rows">
+        <div class="info-row">
+          <span class="info-label">계약 형태</span>
+          <span class="info-value highlight">MSTcad 라이센스 (북미 매출)</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">적용 분야</span>
+          <div class="tags">
+            <span class="tag active">RF-SOI</span>
+            <span class="tag active">PMIC</span>
+            <span class="tag active">CIS</span>
+            <span class="tag">Mixed-Signal</span>
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="info-label">특이사항</span>
+          <span class="info-value" style="color:#34d399">뉴포트비치 Fab3: RF·SiGe·MEMS<br>인텔 공장 내 라인 보유<br>STM과 고객망 중첩</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">실리콘포토닉스</span>
+          <span class="info-value" style="color:#fbbf24">RF · 실리콘포토닉스 통합 라인 주목</span>
+        </div>
+      </div>
+      <div class="note-box">파운드리 라이센스 추정 출처: 10-K 북미 매출 + Atomera 고객사 도표에 'TowerJazz' 명시</div>
     </div>
 
   </div>
@@ -1075,7 +1118,7 @@
       <div class="card-header">
         <div>
           <div class="company-name">Infineon</div>
-          <div class="company-sub">독일 / Villach 300mm GaN-on-Si Fab 보유</div>
+          <div class="company-sub">독일 / Villach 300mm GaN-on-Si Fab 보유 (당사 추정)</div>
         </div>
         <span class="status-badge badge-commercial">매출 발생 ✓</span>
       </div>
@@ -1096,11 +1139,12 @@
           <div class="tags">
             <span class="tag active">GaN-on-Si (RF)</span>
             <span class="tag active">GaN-on-Si (Power)</span>
+            <span class="tag active">TrenchFET</span>
           </div>
         </div>
         <div class="info-row">
           <span class="info-label">특이사항</span>
-          <span class="info-value" style="color:#34d399">자체 Epi + 소자 제조 가능<br>세계 최초 300mm GaN-on-Si 양산</span>
+          <span class="info-value" style="color:#34d399">자체 Epi + 소자 제조 가능<br>세계 최초 300mm GaN-on-Si 양산<br>4년·$200M TrenchFET 25% 개선 전적</span>
         </div>
         <div class="info-row">
           <span class="info-label">채택 이유</span>
@@ -1114,6 +1158,7 @@
         </div>
         <div class="revenue-amount">$50K ~ $100K</div>
       </div>
+      <div class="note-box" style="margin-top:10px">화합물 반도체 학회 (벨기에, 4/21) GaN 성능 데이터 발표. Synopsys GaN TCAD 확장으로 팹리스 고객기반 확대 진행 중.</div>
     </div>
 
   </div>
@@ -1394,7 +1439,91 @@
 
   </div>
 
-  <div class="divider"></div>
+  <!-- Section: 신규 시장 기회 -->
+  <div class="section-title" style="margin-top:48px">
+    신규 시장 기회 (emerging 채널)
+    <span class="count-badge">3개 분야</span>
+  </div>
+  <div class="cards-grid" style="margin-bottom:48px">
+    <!-- TrenchFET / NVIDIA 800V DC -->
+    <div class="card evaluation" style="border-top-color:transparent; border-top:2px solid #f97316;">
+      <div class="card-header">
+        <div>
+          <div class="company-name">TrenchFET 시장</div>
+          <div class="company-sub">Infineon / OnSemi / STM / AOS — 800V DC AI DC용</div>
+        </div>
+        <span class="status-badge" style="background:rgba(249,115,22,0.15);border:1px solid rgba(249,115,22,0.4);color:#fb923c">⚡ 급성장</span>
+      </div>
+      <div class="info-rows">
+        <div class="info-row">
+          <span class="info-label">시장 규모</span>
+          <span class="info-value highlight">~$5B (Si 30~100V TrenchFET)</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">MST 효과</span>
+          <span class="info-value" style="color:#34d399">Rsp 56% 감소 실측<br>DrainI 2.3배↑ (nMOS)</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">NVIDIA 연관</span>
+          <span class="info-value" style="color:#fbbf24">Rubin Ultra (Kyber 낙)부터 800V DC 도입<br>GPU당 TrenchFET 수백개 탑재 예상</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">유랥 잔재 로열티</span>
+          <span class="info-value" style="color:#a78bfa">$10~30M/년 (20% 침투율 가정)</span>
+        </div>
+      </div>
+      <div class="note-box">⚡ Scott 4Q25 컨콜: "이미 한 고객사가 개발 시작에 관심. 선도업체들과 협의 시작" Infineon + OnSemi 가장 유력</div>
+    </div>
+    <!-- NAND AI eSSD -->
+    <div class="card evaluation" style="border-top:2px solid #7c3aed;">
+      <div class="card-header">
+        <div>
+          <div class="company-name">NAND / AI eSSD</div>
+          <div class="company-sub">SK하이닉스 / 삼성 / 마이크론 / 키옵시아</div>
+        </div>
+        <span class="status-badge" style="background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.4);color:#a78bfa">신규 기회</span>
+      </div>
+      <div class="info-rows">
+        <div class="info-row">
+          <span class="info-label">드라이버</span>
+          <span class="info-value highlight">NVIDIA SCADA 2028: 1,000만→1억 IOPS</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">MST 효과</span>
+          <span class="info-value" style="color:#34d399">쳄널 속도 15~30% 향상 기대<br>V9부터 수율 개선 지원</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">SK 하이닉스 목표</span>
+          <span class="info-value" style="color:#fbbf24">26년말 2,500만 IOPS<br>27년말 1억 IOPS (AI-N P)</span>
+        </div>
+      </div>
+    </div>
+    <!-- CIS 이미지 센서 -->
+    <div class="card evaluation" style="border-top:2px solid #10b981;">
+      <div class="card-header">
+        <div>
+          <div class="company-name">CIS (이미지 센서)</div>
+          <div class="company-sub">SONY / Samsung LSI / STM</div>
+        </div>
+        <span class="status-badge badge-evaluation">잠재 고객</span>
+      </div>
+      <div class="info-rows">
+        <div class="info-row">
+          <span class="info-label">핵심 특허</span>
+          <span class="info-value highlight">US-12575199-B2<br>시스템 포토다이오드 + MST</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">MST 효과</span>
+          <span class="info-value" style="color:#34d399">다크커런트 저감<br>도판트 확산 억제<br>IR 1.3~1.55μm 감도 (Si 기반)</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">차별점</span>
+          <span class="info-value" style="color:#fbbf24">기존 Si Epi 장비로 해결<br>InGaAs 등 화합물반도체 불필요</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
 
   <!-- Valuation Methodology -->
   <div class="valuation-box">
@@ -1700,7 +1829,7 @@
       ※ 산출 공식: <strong style="color:#e2e8f0">연간 로열티 추정 × PSR 40배 = 시총 기여 현재가치</strong><br>
       ※ 비교 사례: ARM Holdings PSR 40배 / Forward P/E 70배 적용 중 (2026년 기준)<br>
       ※ STM 계약 발표 시 실제 시총 +$140M 상승 → 추정 공식과 부합하는 실증 데이터<br>
-      ※ 현재 주가 $8.60 / 시총 $295M / 주식수 34.4M주 (Yahoo Finance 2026.04.28 기준) / 투자 참고용 추정치이며 실제와 다를 수 있음
+      <span id="plLiveFooter">※ 현재 주가 $8.60 / 시총 $295M / 주식수 34.4M주 (Yahoo Finance 2026.04.28 기준)</span> / 투자 참고용 추정치이며 실제와 다를 수 있음
     </div>
   </div>
 
@@ -1726,9 +1855,49 @@
   </div>
 
   <div class="footer">
-    ATOMERA INC. (NASDAQ: ATOM) — 비공개 추정 포함 / 투자 참고용 자료 — 2026.04.28
+    ATOMERA INC. (NASDAQ: ATOM) — 비공개 추정 포함 / 투자 참고용 자료 — 2026.04.29
   </div>
 
 </div>
+
+<script>
+// ── 실시간 주가 (Yahoo Finance via allorigins proxy) ──
+const ATOM_FALLBACK = { price: 8.60, mktcapM: 295, high52: 9.59, low52: 1.89 };
+async function fetchAtomLive() {
+  const proxy = 'https://api.allorigins.win/get?url=';
+  const url = 'https://query1.finance.yahoo.com/v8/finance/chart/ATOM?interval=1d&range=1d';
+  try {
+    const r = await fetch(proxy + encodeURIComponent(url), { signal: AbortSignal.timeout(6000) });
+    const j = await r.json();
+    const m = JSON.parse(j.contents).chart.result[0].meta;
+    return {
+      price: m.regularMarketPrice || m.regularMarketPreviousClose || ATOM_FALLBACK.price,
+      mktcapM: m.marketCap ? Math.round(m.marketCap / 1e6 * 10) / 10 : ATOM_FALLBACK.mktcapM,
+      high52: m.fiftyTwoWeekHigh || ATOM_FALLBACK.high52,
+      low52: m.fiftyTwoWeekLow || ATOM_FALLBACK.low52,
+      live: true
+    };
+  } catch(e) {
+    return { ...ATOM_FALLBACK, live: false };
+  }
+}
+async function refreshAtomPrice() {
+  const btn = document.getElementById('plRefreshBtn');
+  if (btn) { btn.textContent = '⟳ 로딩...'; btn.disabled = true; }
+  const d = await fetchAtomLive();
+  const ps = '$' + d.price.toFixed(2);
+  const ms = '$' + d.mktcapM + 'M';
+  const src = d.live ? ('실시간 · ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit',minute:'2-digit'})) : 'Yahoo Finance 2026.04.28 (캐시)';
+  const g = id => document.getElementById(id);
+  if (g('plLivePrice'))  g('plLivePrice').textContent  = ps;
+  if (g('plLiveMktcap')) g('plLiveMktcap').textContent = ms;
+  if (g('plLive52w'))    g('plLive52w').textContent    = '$' + d.low52.toFixed(2) + ' ~ $' + d.high52.toFixed(2);
+  if (g('plLiveSrc'))    g('plLiveSrc').textContent    = src;
+  if (g('plLiveFooter')) g('plLiveFooter').textContent = '※ 현재 주가 ' + ps + ' / 시총 ' + ms + ' / 주식수 34.4M주 (' + src + ')';
+  if (btn) { btn.textContent = d.live ? '✓ 실시간' : '✗ 캐시'; btn.disabled = false;
+             btn.style.color = d.live ? '#34d399' : '#f59e0b'; }
+}
+refreshAtomPrice();
+</script>
 </body>
 </html>
