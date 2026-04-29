@@ -1547,8 +1547,8 @@ async function fetchAtomLive() {
     const j = await r.json();
     const m = JSON.parse(j.contents).chart.result[0].meta;
     const price = m.regularMarketPrice || m.regularMarketPreviousClose || ATOM_FALLBACK.price;
-    const mktcapM = m.marketCap ? Math.round(m.marketCap / 1e6 * 10) / 10 : ATOM_FALLBACK.mktcapM;
-    const shares = m.marketCap && price ? Math.round(m.marketCap / price / 1e6 * 10) / 10 : ATOM_FALLBACK.shares;
+    const shares = ATOM_FALLBACK.shares;
+    const mktcapM = Math.round(shares * price);
     return {
       price, mktcapM, shares,
       high52: m.fiftyTwoWeekHigh || ATOM_FALLBACK.high52,

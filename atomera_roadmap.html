@@ -814,8 +814,8 @@ async function fetchRmLive() {
     const j = await r.json();
     const m = JSON.parse(j.contents).chart.result[0].meta;
     const price = m.regularMarketPrice || m.regularMarketPreviousClose || RM_FALLBACK.price;
-    const mktcapM = m.marketCap ? Math.round(m.marketCap / 1e6 * 10) / 10 : RM_FALLBACK.mktcapM;
-    const shares = m.marketCap && price ? Math.round(m.marketCap / price / 1e6 * 10) / 10 : RM_FALLBACK.shares;
+    const shares = RM_FALLBACK.shares;
+    const mktcapM = Math.round(shares * price);
     return { price, mktcapM, shares, live: true };
   } catch(e) { return { ...RM_FALLBACK, live: false }; }
 }
