@@ -313,7 +313,17 @@ function calcPSR(mktcap, revenue) {
   return mktcap / revenue;
 }
 
-// ── Yahoo Finance fetch ──
+// ── Yahoo Finance fetch + 당일 캐시 ──
+const PSR_CACHE_KEY = 'PSR_COMPARE_CACHE';
+function todayStr() { const d=new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
+function loadDayCache() {
+  try { const c=JSON.parse(localStorage.getItem(PSR_CACHE_KEY));
+    if(c && c.day===todayStr()) return c.data; } catch(e){} return {};
+}
+function saveDayCache(data) {
+  try { localStorage.setItem(PSR_CACHE_KEY, JSON.stringify({day:todayStr(), data})); } catch(e){}
+}
+// ATOM 전용 캐시 (다른 탭 공유용 - 유지)
 const ATOM_CACHE_KEY = 'ATOM_LIVE_CACHE';
 const ATOM_CACHE_TTL = 5 * 60 * 1000;
 function saveAtomCache(d) { try { localStorage.setItem(ATOM_CACHE_KEY, JSON.stringify({...d, ts: Date.now()})); } catch(e) {} }
@@ -328,9 +338,14 @@ async function proxyFetch(url) {
   return null;
 }
 
-// 개별 티커 시총 fetch (v8 chart API - 주가 fetch → 주식수 × 주가 계산)
-async function fetchOneMktcap(ticker, sharesB) {
+// 개별 티커 시총 fetch (당일 캐시 → miss 시 v8 chart API)
+async function fetchOneMktcap(ticker, sharesB, forceRefresh) {
   if (ticker === '—' || !sharesB) return null;
+  // 당일 캐시 확인 (강제 새로고침이 아닌 경우)
+  if (!forceRefresh) {
+    const cache = loadDayCache();
+    if (cache[ticker]) return cache[ticker];
+  }
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
   try {
     const text = await proxyFetch(url);
@@ -339,6 +354,9 @@ async function fetchOneMktcap(ticker, sharesB) {
     const price = m.regularMarketPrice || m.regularMarketPreviousClose;
     if (!price) return null;
     const capB = sharesB * price; // $B
+    // 당일 캐시에 저장
+    const cache = loadDayCache(); cache[ticker] = capB; saveDayCache(cache);
+    // ATOM은 다른 탭 공유용 별도 캐시도 저장
     if (ticker === 'ATOM') {
       saveAtomCache({ price, mktcapM: Math.round(capB * 1000), shares: sharesB * 1000,
         high52: m.fiftyTwoWeekHigh, low52: m.fiftyTwoWeekLow });
@@ -445,17 +463,13 @@ function initScaffold() {
 // fetch 전 초기 상태: mktcap=null, psr=null, live=false
 let fetchedData = COMPANIES.map(c => ({ ...c, mktcap: null, psr: null, live: false }));
 
-// ── 단일 종목 재시도 (해당 종목만) ──
+// ── 단일 종목 재시도 (해당 종목만, 강제 새로고침) ──
 async function retryOne(ticker) {
   const btnId = 'btn-' + ticker.replace('—','mpeg');
   const btn = document.getElementById(btnId);
   if (btn) { btn.textContent = '...'; btn.disabled = true; }
   const idx = fetchedData.findIndex(c => c.ticker === ticker);
-  let liveCap = await fetchOneMktcap(ticker, idx !== -1 ? fetchedData[idx].sharesB : undefined);
-  if (liveCap === null && ticker === 'ATOM') {
-    const cached = loadAtomCache();
-    if (cached) liveCap = cached.mktcapM / 1000;
-  }
+  let liveCap = await fetchOneMktcap(ticker, idx !== -1 ? fetchedData[idx].sharesB : undefined, true);
   if (idx !== -1 && liveCap !== null) {
     fetchedData[idx] = { ...fetchedData[idx], mktcap: liveCap, psr: calcPSR(liveCap, fetchedData[idx].revenue), live: true };
   }
@@ -471,10 +485,6 @@ async function refreshAll() {
   for (let i = 0; i < tickers.length; i++) {
     const c = tickers[i];
     let liveCap = await fetchOneMktcap(c.ticker, c.sharesB);
-    if (liveCap === null && c.ticker === 'ATOM') {
-      const cached = loadAtomCache();
-      if (cached) liveCap = cached.mktcapM / 1000;
-    }
     const idx = fetchedData.findIndex(x => x.ticker === c.ticker);
     if (idx !== -1) {
       fetchedData[idx] = {
