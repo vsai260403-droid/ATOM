@@ -585,7 +585,7 @@ const CONTRACTS = [
     activeClass: 'active-green',
     market: 3,
     share: 1.0,
-    defaultOn: true,
+    defaultOn: false,
     barColor: '#10b981',
     note: '전력 반도체 $3B × 로열티율 × PSR (풀램프 기준)'
   },
@@ -599,7 +599,7 @@ const CONTRACTS = [
     activeClass: 'active-green',
     market: 5,
     share: 0.20,
-    defaultOn: true,
+    defaultOn: false,
     barColor: '#10b981',
     note: 'Power $5B × 침투율 20% × 로열티율 × PSR (풀램프 기준)'
   },
@@ -689,7 +689,7 @@ const CONTRACTS = [
   },
 ];
 
-const BASE_MKTCAP_B = 0.295; // $295M
+// BASE_MKTCAP_B removed — now computed dynamically from state.basePrice × state.shares
 
 // ── State ──────────────────────────────────────────────────────
 let state = {
@@ -787,7 +787,7 @@ function calculate() {
     }
   });
 
-  const totalMktcap = BASE_MKTCAP_B + totalAdd; // B
+  const totalMktcap = baseMktcap + totalAdd; // B
   const targetPrice = (totalMktcap * 1000) / shares;
   lastTargetPrice = targetPrice;
   const upside = targetPrice / basePrice;
