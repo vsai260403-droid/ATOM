@@ -319,22 +319,25 @@ const ATOM_CACHE_KEY = 'ATOM_LIVE_CACHE';
 const ATOM_CACHE_TTL = 5 * 60 * 1000;
 function saveAtomCache(d) { try { localStorage.setItem(ATOM_CACHE_KEY, JSON.stringify({...d, ts: Date.now()})); } catch(e) {} }
 function loadAtomCache() { try { const c = JSON.parse(localStorage.getItem(ATOM_CACHE_KEY)); if (c && Date.now() - c.ts < ATOM_CACHE_TTL) return c; } catch(e) {} return null; }
-async function fetchMktcap(ticker) {
-  if (ticker === '—') return null;
-  const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${ticker}&fields=marketCap,regularMarketPrice,fiftyTwoWeekHigh,fiftyTwoWeekLow`;
+async function fetchAllMktcaps() {
+  const tickers = COMPANIES.filter(c => c.ticker !== '—').map(c => c.ticker).join(',');
+  const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${tickers}&fields=marketCap,regularMarketPrice,fiftyTwoWeekHigh,fiftyTwoWeekLow`;
   try {
-    const r = await fetch(PROXY + encodeURIComponent(url), { signal: AbortSignal.timeout(8000) });
+    const r = await fetch(PROXY + encodeURIComponent(url), { signal: AbortSignal.timeout(10000) });
     const j = await r.json();
-    const q = JSON.parse(j.contents).quoteResponse.result[0];
-    const cap = q?.marketCap;
-    if (ticker === 'ATOM' && cap) {
-      const price = q.regularMarketPrice;
-      const shares = 39.4;
-      saveAtomCache({ price, mktcapM: Math.round(shares * price), shares,
-        high52: q.fiftyTwoWeekHigh, low52: q.fiftyTwoWeekLow });
-    }
-    return cap ? cap / 1e9 : null; // → $B
-  } catch(e) { return null; }
+    const results = JSON.parse(j.contents).quoteResponse.result;
+    const map = {};
+    results.forEach(q => {
+      map[q.symbol] = q.marketCap ? q.marketCap / 1e9 : null;
+      if (q.symbol === 'ATOM' && q.marketCap) {
+        const price = q.regularMarketPrice;
+        const shares = 39.4;
+        saveAtomCache({ price, mktcapM: Math.round(shares * price), shares,
+          high52: q.fiftyTwoWeekHigh, low52: q.fiftyTwoWeekLow });
+      }
+    });
+    return map; // { TICKER: capInB, ... }
+  } catch(e) { return {}; }
 }
 
 // ── 렌더 ──
@@ -435,49 +438,35 @@ function initScaffold() {
 // fetch 전 초기 상태: mktcap=null, psr=null, live=false
 let fetchedData = COMPANIES.map(c => ({ ...c, mktcap: null, psr: null, live: false }));
 
-// ── 단일 종목 재시도 ──
+// ── 단일 종목 재시도 (전체 일괄 재요청) ──
 async function retryOne(ticker) {
-  const btnId = 'btn-' + ticker.replace('—','mpeg');
-  const btn = document.getElementById(btnId);
-  if (btn) { btn.textContent = '...'; btn.disabled = true; }
-  const liveCap = await fetchMktcap(ticker);
-  const idx = fetchedData.findIndex(c => c.ticker === ticker);
-  if (idx === -1) return;
-  if (liveCap !== null) {
-    fetchedData[idx] = { ...fetchedData[idx], mktcap: liveCap, psr: calcPSR(liveCap, fetchedData[idx].revenue), live: true };
-  }
-  renderTable(fetchedData);
-  renderScatter(fetchedData);
-  updateSummary(fetchedData);
-  updateNote(fetchedData);
+  await refreshAll();
 }
 
 async function refreshAll() {
   const btn = document.getElementById('compareRefreshBtn');
   if (btn) { btn.textContent = '⟳ 로딩 중...'; btn.disabled = true; }
 
-  // 순차 fetch (300ms 간격) - allorigins 레이트 리밋 회피
-  const results = [];
-  for (const c of COMPANIES) {
-    let liveCap = await fetchMktcap(c.ticker);
+  // 전체 티커 한 번에 fetch (1회 API 호출)
+  const capMap = await fetchAllMktcaps();
+
+  const results = COMPANIES.map(c => {
+    let liveCap = capMap[c.ticker] ?? null;
     if (liveCap === null && c.ticker === 'ATOM') {
       const cached = loadAtomCache();
       if (cached) { liveCap = cached.mktcapM / 1000; }
     }
     const mktcap = liveCap !== null ? liveCap : null;
     const psr    = calcPSR(mktcap, c.revenue);
-    results.push({ ...c, mktcap, psr, live: liveCap !== null });
-    // 중간 렌더 - 성공한 항목 즉시 반영
-    fetchedData = [...results, ...COMPANIES.slice(results.length).map(x => fetchedData.find(f => f.ticker === x.ticker) || { ...x, mktcap: null, psr: null, live: false })];
-    renderTable(fetchedData);
-    if (c.ticker !== COMPANIES[COMPANIES.length-1].ticker) await new Promise(r => setTimeout(r, 300));
-  }
+    return { ...c, mktcap, psr, live: liveCap !== null };
+  });
 
   fetchedData = results;
   renderTable(results);
   renderScatter(results);
   updateSummary(results);
   updateNote(results);
+  if (btn) { btn.disabled = false; }
 }
 
 function updateSummary(results) {
