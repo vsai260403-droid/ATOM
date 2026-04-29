@@ -897,7 +897,7 @@
       <div class="meta-item">현재가 (Prev. Close)<span id="plLivePrice" style="color:#00d4ff;font-family:'Bebas Neue',sans-serif;font-size:18px">$8.60</span></div>
       <div class="meta-item">시가총액<span id="plLiveMktcap" style="color:#a78bfa">$295.5M</span></div>
       <div class="meta-item">52주 범위<span id="plLive52w">$1.89 ~ $9.59</span></div>
-      <div class="meta-item">유통주식수<span>~34.4M주</span></div>
+      <div class="meta-item">유통주식수<span id="plLiveShares">~39.4M주</span></div>
       <div class="meta-item">소스<span id="plLiveSrc" style="color:#64748b">Yahoo Finance 2026.04.28</span></div>
       <div class="meta-item"><button id="plRefreshBtn" onclick="refreshAtomPrice()" style="background:#1e2d45;border:1px solid #334155;color:#9ca3af;font-size:10px;padding:3px 10px;border-radius:4px;cursor:pointer;font-family:'DM Mono',monospace;letter-spacing:0.05em">⟳ 실시간</button></div>
     </div>
@@ -1538,7 +1538,7 @@
 
 <script>
 // ── 실시간 주가 (Yahoo Finance via allorigins proxy) ──
-const ATOM_FALLBACK = { price: 8.60, mktcapM: 295, high52: 9.59, low52: 1.89 };
+const ATOM_FALLBACK = { price: 8.60, mktcapM: Math.round(39.4*8.60), shares: 39.4, high52: 9.59, low52: 1.89 };
 async function fetchAtomLive() {
   const proxy = 'https://api.allorigins.win/get?url=';
   const url = 'https://query1.finance.yahoo.com/v8/finance/chart/ATOM?interval=1d&range=1d';
@@ -1546,9 +1546,11 @@ async function fetchAtomLive() {
     const r = await fetch(proxy + encodeURIComponent(url), { signal: AbortSignal.timeout(6000) });
     const j = await r.json();
     const m = JSON.parse(j.contents).chart.result[0].meta;
+    const price = m.regularMarketPrice || m.regularMarketPreviousClose || ATOM_FALLBACK.price;
+    const mktcapM = m.marketCap ? Math.round(m.marketCap / 1e6 * 10) / 10 : ATOM_FALLBACK.mktcapM;
+    const shares = m.marketCap && price ? Math.round(m.marketCap / price / 1e6 * 10) / 10 : ATOM_FALLBACK.shares;
     return {
-      price: m.regularMarketPrice || m.regularMarketPreviousClose || ATOM_FALLBACK.price,
-      mktcapM: m.marketCap ? Math.round(m.marketCap / 1e6 * 10) / 10 : ATOM_FALLBACK.mktcapM,
+      price, mktcapM, shares,
       high52: m.fiftyTwoWeekHigh || ATOM_FALLBACK.high52,
       low52: m.fiftyTwoWeekLow || ATOM_FALLBACK.low52,
       live: true
@@ -1569,7 +1571,9 @@ async function refreshAtomPrice() {
   if (g('plLiveMktcap')) g('plLiveMktcap').textContent = ms;
   if (g('plLive52w'))    g('plLive52w').textContent    = '$' + d.low52.toFixed(2) + ' ~ $' + d.high52.toFixed(2);
   if (g('plLiveSrc'))    g('plLiveSrc').textContent    = src;
-  if (g('plLiveFooter')) g('plLiveFooter').textContent = '※ 현재 주가 ' + ps + ' / 시총 ' + ms + ' / 주식수 34.4M주 (' + src + ')';
+  const sharesStr = d.shares ? d.shares.toFixed(1) + 'M주' : '39.4M주';
+  if (g('plLiveShares')) g('plLiveShares').textContent = '~' + sharesStr;
+  if (g('plLiveFooter')) g('plLiveFooter').textContent = '※ 현재 주가 ' + ps + ' / 시총 ' + ms + ' / 주식수 ' + sharesStr + ' (' + src + ')';
   if (btn) { btn.textContent = d.live ? '✓ 실시간' : '✗ 캐시'; btn.disabled = false;
              btn.style.color = d.live ? '#34d399' : '#f59e0b'; }
 }

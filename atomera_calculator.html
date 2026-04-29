@@ -479,7 +479,7 @@
       <div class="input-label">유통 주식수
         <small>희석 시 늘어남</small>
       </div>
-      <input type="number" id="sharesInput" value="34.4" min="1" max="200" step="0.1">
+      <input type="number" id="sharesInput" value="39.4" min="1" max="200" step="0.1">
       <div class="input-unit">M주</div>
     </div>
 
@@ -689,13 +689,14 @@ const CONTRACTS = [
   },
 ];
 
-// BASE_MKTCAP_B removed — now computed dynamically from state.basePrice × state.shares
+// 기준 주식수: 2026.02 유상증자(+5M주) 반영 후 39.4M주
+const CALC_SHARES_FALLBACK = 39.4;
 
 // ── State ──────────────────────────────────────────────────────
 let state = {
   royalty: 0.5,
   psr: 40,
-  shares: 34.4,
+  shares: CALC_SHARES_FALLBACK,
   basePrice: 8.60,
   selected: new Set(CONTRACTS.filter(c => c.defaultOn).map(c => c.id))
 };
@@ -735,7 +736,7 @@ function init() {
     calculate();
   });
   document.getElementById('sharesInput').addEventListener('input', e => {
-    state.shares = parseFloat(e.target.value) || 34.4;
+    state.shares = parseFloat(e.target.value) || CALC_SHARES_FALLBACK;
     calculate();
   });
   document.getElementById('basePriceInput').addEventListener('input', e => {
@@ -925,13 +926,13 @@ function applyPreset(type) {
 function resetAll() {
   state.royalty = 0.5;
   state.psr = 40;
-  state.shares = 34.4;
+  state.shares = CALC_SHARES_FALLBACK;
   state.basePrice = 8.60;
   state.selected = new Set(CONTRACTS.filter(c => c.defaultOn).map(c => c.id));
 
   document.getElementById('royaltySlider').value = 0.5;
   document.getElementById('psrSlider').value = 40;
-  document.getElementById('sharesInput').value = 34.4;
+  document.getElementById('sharesInput').value = CALC_SHARES_FALLBACK;
   document.getElementById('basePriceInput').value = 8.60;
   document.getElementById('royaltyVal').textContent = '0.5%';
   document.getElementById('psrVal').textContent = '40x';
@@ -953,7 +954,7 @@ function resetAll() {
 init();
 
 // ── 실시간 주가 (Yahoo Finance via allorigins proxy) ──
-const CALC_FALLBACK = { price: 8.60, mktcapM: 295 };
+const CALC_FALLBACK = { price: 8.60, mktcapM: Math.round(39.4 * 8.60), shares: 39.4 };
 async function fetchCalcLive() {
   const proxy = 'https://api.allorigins.win/get?url=';
   const url = 'https://query1.finance.yahoo.com/v8/finance/chart/ATOM?interval=1d&range=1d';
@@ -961,28 +962,27 @@ async function fetchCalcLive() {
     const r = await fetch(proxy + encodeURIComponent(url), { signal: AbortSignal.timeout(6000) });
     const j = await r.json();
     const m = JSON.parse(j.contents).chart.result[0].meta;
-    return {
-      price: m.regularMarketPrice || m.regularMarketPreviousClose || CALC_FALLBACK.price,
-      mktcapM: m.marketCap ? Math.round(m.marketCap / 1e6 * 10) / 10 : CALC_FALLBACK.mktcapM,
-      live: true
-    };
+    const price = m.regularMarketPrice || m.regularMarketPreviousClose || CALC_FALLBACK.price;
+    const mktcapM = m.marketCap ? Math.round(m.marketCap / 1e6 * 10) / 10 : CALC_FALLBACK.mktcapM;
+    // 주식수 역산: Yahoo marketCap / price (소수점 1자리 M단위)
+    const shares = m.marketCap && price ? Math.round(m.marketCap / price / 1e6 * 10) / 10 : CALC_FALLBACK.shares;
+    return { price, mktcapM, shares, live: true };
   } catch(e) { return { ...CALC_FALLBACK, live: false }; }
 }
 async function refreshCalcPrice() {
   const btn = document.getElementById('calcRefreshBtn');
   if (btn) { btn.textContent = '⟳ 로딩...'; btn.disabled = true; }
   const d = await fetchCalcLive();
-  const inp = document.getElementById('basePriceInput');
-  if (inp) {
-    inp.value = d.price.toFixed(2);
-    state.basePrice = d.price;
-    calculate();
-  }
+  const priceInp = document.getElementById('basePriceInput');
+  const sharesInp = document.getElementById('sharesInput');
+  if (priceInp) { priceInp.value = d.price.toFixed(2); state.basePrice = d.price; }
+  if (sharesInp) { sharesInp.value = d.shares.toFixed(1); state.shares = d.shares; }
+  calculate();
   const src = d.live
     ? ('실시간 · ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit',minute:'2-digit'}))
-    : 'Yahoo Finance 2026.04.28 (캐시)';
+    : '폴백값 (Yahoo 연결 실패)';
   const note = document.getElementById('calcLiveNote');
-  if (note) note.textContent = '※ 현재 주가 $' + d.price.toFixed(2) + ' / 시총 $' + d.mktcapM + 'M 기준 (' + src + ')';
+  if (note) note.textContent = '※ 현재 주가 $' + d.price.toFixed(2) + ' / 시총 $' + d.mktcapM + 'M / 주식수 ' + d.shares.toFixed(1) + 'M주 (' + src + ')';
   if (btn) { btn.textContent = d.live ? '✓ 실시간' : '✗ 캐시'; btn.disabled = false;
              btn.style.color = d.live ? '#34d399' : '#f59e0b'; }
 }

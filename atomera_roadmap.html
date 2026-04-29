@@ -337,7 +337,7 @@
       </div>
     </div>
     <div class="stat-box">
-      <div class="stat-num" id="rmLiveMktcap">$295M</div>
+      <div class="stat-num" id="rmLiveMktcap">$339M</div>
       <div class="stat-lbl">현재 시가총액</div>
     </div>
     <div class="stat-box">
@@ -805,7 +805,7 @@
 </div>
 
 <script>
-const RM_FALLBACK = { price: 8.60, mktcapM: 295 };
+const RM_FALLBACK = { price: 8.60, mktcapM: Math.round(39.4*8.60), shares: 39.4 };
 async function fetchRmLive() {
   const proxy = 'https://api.allorigins.win/get?url=';
   const url = 'https://query1.finance.yahoo.com/v8/finance/chart/ATOM?interval=1d&range=1d';
@@ -813,11 +813,10 @@ async function fetchRmLive() {
     const r = await fetch(proxy + encodeURIComponent(url), { signal: AbortSignal.timeout(6000) });
     const j = await r.json();
     const m = JSON.parse(j.contents).chart.result[0].meta;
-    return {
-      price: m.regularMarketPrice || m.regularMarketPreviousClose || RM_FALLBACK.price,
-      mktcapM: m.marketCap ? Math.round(m.marketCap / 1e6 * 10) / 10 : RM_FALLBACK.mktcapM,
-      live: true
-    };
+    const price = m.regularMarketPrice || m.regularMarketPreviousClose || RM_FALLBACK.price;
+    const mktcapM = m.marketCap ? Math.round(m.marketCap / 1e6 * 10) / 10 : RM_FALLBACK.mktcapM;
+    const shares = m.marketCap && price ? Math.round(m.marketCap / price / 1e6 * 10) / 10 : RM_FALLBACK.shares;
+    return { price, mktcapM, shares, live: true };
   } catch(e) { return { ...RM_FALLBACK, live: false }; }
 }
 async function refreshRmPrice() {
