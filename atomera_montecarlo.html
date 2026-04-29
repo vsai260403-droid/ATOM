@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atomera 몬테카를로 시뮬레이션</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #050810;
+    --surface: #0c1220;
+    --surface2: #111827;
+    --border: #1e2d45;
+    --accent: #00d4ff;
+    --purple: #7c3aed;
+    --purple-light: #a78bfa;
+    --green: #10b981;
+    --yellow: #f59e0b;
+    --red: #f87171;
+    --blue: #3b82f6;
+    --text: #e2e8f0;
+    --muted: #9ca3af;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    padding: 24px 16px 48px;
+  }
+
+  .container { max-width: 940px; margin: 0 auto; }
+
+  .page-title {
+    font-size: 24px; font-weight: 700; color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .page-sub {
+    font-size: 12px; color: var(--muted); margin-bottom: 24px;
+    font-family: 'Courier New', monospace;
+  }
+
+  /* ── 설정 패널 ── */
+  .config-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .config-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .config-label {
+    font-size: 10px; color: var(--muted);
+    font-family: 'Courier New', monospace;
+    text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .config-input {
+    width: 100%;
+    background: #0a0e1a;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 700;
+    padding: 8px 12px;
+    outline: none;
+    font-family: 'Courier New', monospace;
+    transition: border-color 0.2s;
+  }
+  .config-input:focus { border-color: var(--accent); }
+  .config-hint {
+    font-size: 10px; color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* ── 실행 버튼 ── */
+  .run-row {
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 24px; flex-wrap: wrap;
+  }
+  .run-btn {
+    background: linear-gradient(135deg, var(--purple), var(--accent));
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 14px 36px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 0 20px rgba(124,58,237,0.3);
+  }
+  .run-btn:hover { transform: scale(1.03); box-shadow: 0 0 30px rgba(124,58,237,0.5); }
+  .run-btn:active { transform: scale(0.98); }
+  .run-status {
+    font-size: 12px; color: var(--muted);
+    font-family: 'Courier New', monospace;
+  }
+
+  /* ── 결과 요약 카드 ── */
+  .summary-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .sum-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .sum-card.highlight {
+    border-color: var(--purple);
+    box-shadow: 0 0 20px rgba(124,58,237,0.15);
+  }
+  .sum-label {
+    font-size: 10px; color: var(--muted);
+    font-family: 'Courier New', monospace;
+    text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .sum-value {
+    font-size: 24px; font-weight: 700;
+  }
+  .sum-sub {
+    font-size: 10px; color: var(--muted); margin-top: 2px;
+  }
+
+  /* ── 히스토그램 ── */
+  .chart-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  .chart-title {
+    font-size: 13px; color: var(--muted);
+    font-family: 'Courier New', monospace;
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .chart-title::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  canvas#histCanvas {
+    width: 100%;
+    height: 320px;
+    display: block;
+  }
+
+  /* ── 확률 테이블 ── */
+  .prob-table-wrap {
+    overflow-x: auto;
+  }
+  table {
+    width: 100%; border-collapse: collapse; font-size: 13px;
+    min-width: 500px;
+  }
+  th {
+    background: #0c1220;
+    color: var(--muted);
+    font-size: 10px;
+    font-family: 'Courier New', monospace;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #12121e;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+  }
+  tr:hover td { background: #12121e; }
+  .prob-bar-cell { width: 160px; }
+  .prob-bar-bg {
+    background: #1a1a2e; border-radius: 4px;
+    height: 8px; overflow: hidden; margin-top: 4px;
+  }
+  .prob-bar-fill {
+    height: 100%; border-radius: 4px;
+    transition: width 0.6s ease;
+  }
+  .num { text-align: right; }
+
+  /* ── 개별 경로 차트 ── */
+  canvas#pathCanvas {
+    width: 100%;
+    height: 260px;
+    display: block;
+  }
+
+  /* ── 애니메이션 ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .animated { animation: fadeUp 0.4s ease both; }
+
+  @media (min-width:641px) { body { zoom: 1.15; } }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="page-title">🎰 몬테카를로 시뮬레이션</div>
+  <div class="page-sub">10,000회 랜덤 시뮬레이션으로 Atomera 목표 주가 확률 분포를 산출합니다</div>
+
+  <!-- 설정 -->
+  <div class="config-grid">
+    <div class="config-card">
+      <div class="config-label">현재 주가 ($)</div>
+      <input class="config-input" id="currentPrice" type="number" value="4.20" step="0.01">
+      <div class="config-hint">최근 종가 기준</div>
+    </div>
+    <div class="config-card">
+      <div class="config-label">연간 기대 수익률 (%)</div>
+      <input class="config-input" id="annualReturn" type="number" value="80" step="1">
+      <div class="config-hint">MST 상업화 + IP 라이선싱 시나리오</div>
+    </div>
+    <div class="config-card">
+      <div class="config-label">연간 변동성 (%)</div>
+      <input class="config-input" id="annualVol" type="number" value="90" step="1">
+      <div class="config-hint">소형 반도체 IP 기업 특성 반영</div>
+    </div>
+    <div class="config-card">
+      <div class="config-label">시뮬레이션 기간 (개월)</div>
+      <input class="config-input" id="months" type="number" value="12" step="1">
+      <div class="config-hint">1~60개월</div>
+    </div>
+    <div class="config-card">
+      <div class="config-label">시뮬레이션 횟수</div>
+      <input class="config-input" id="simCount" type="number" value="10000" step="1000">
+      <div class="config-hint">1,000 ~ 100,000</div>
+    </div>
+    <div class="config-card">
+      <div class="config-label">촉매 이벤트 프리미엄 (%)</div>
+      <input class="config-input" id="catalystPremium" type="number" value="30" step="5">
+      <div class="config-hint">삼성 계약 등 빅뉴스 반영 확률</div>
+    </div>
+  </div>
+
+  <!-- 실행 -->
+  <div class="run-row">
+    <button class="run-btn" id="runBtn" onclick="runSimulation()">▶  시뮬레이션 실행</button>
+    <span class="run-status" id="runStatus">파라미터를 설정하고 실행 버튼을 누르세요</span>
+  </div>
+
+  <!-- 결과 요약 -->
+  <div class="summary-row" id="summaryRow" style="display:none;">
+    <div class="sum-card highlight">
+      <div class="sum-label">중앙값 (50%ile)</div>
+      <div class="sum-value" id="medianPrice" style="color:var(--accent);">—</div>
+      <div class="sum-sub" id="medianReturn"></div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-label">평균 (Mean)</div>
+      <div class="sum-value" id="meanPrice" style="color:var(--purple-light);">—</div>
+      <div class="sum-sub" id="meanReturn"></div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-label">10%ile (비관)</div>
+      <div class="sum-value" id="p10Price" style="color:var(--red);">—</div>
+      <div class="sum-sub" id="p10Return"></div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-label">90%ile (낙관)</div>
+      <div class="sum-value" id="p90Price" style="color:var(--green);">—</div>
+      <div class="sum-sub" id="p90Return"></div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-label">$10+ 확률</div>
+      <div class="sum-value" id="prob10" style="color:var(--yellow);">—</div>
+      <div class="sum-sub">2배 이상 상승</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-label">$20+ 확률</div>
+      <div class="sum-value" id="prob20" style="color:var(--green);">—</div>
+      <div class="sum-sub">5배 이상 상승</div>
+    </div>
+  </div>
+
+  <!-- 히스토그램 차트 -->
+  <div class="chart-panel" id="histPanel" style="display:none;">
+    <div class="chart-title">최종 주가 분포 히스토그램</div>
+    <canvas id="histCanvas"></canvas>
+  </div>
+
+  <!-- 샘플 경로 차트 -->
+  <div class="chart-panel" id="pathPanel" style="display:none;">
+    <div class="chart-title">개별 시뮬레이션 경로 (50개 샘플)</div>
+    <canvas id="pathCanvas"></canvas>
+  </div>
+
+  <!-- 확률 테이블 -->
+  <div class="chart-panel" id="tablePanel" style="display:none;">
+    <div class="chart-title">목표 주가별 도달 확률</div>
+    <div class="prob-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>목표 주가</th>
+            <th>도달 확률</th>
+            <th>수익률</th>
+            <th class="prob-bar-cell">분포</th>
+            <th>평가</th>
+          </tr>
+        </thead>
+        <tbody id="probTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// === GBM(기하 브라운 운동) 기반 몬테카를로 ===
+function gaussianRandom() {
+  let u = 0, v = 0;
+  while (u === 0) u = Math.random();
+  while (v === 0) v = Math.random();
+  return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+}
+
+let allPaths = [];
+let allFinals = [];
+
+function runSimulation() {
+  const S0 = parseFloat(document.getElementById('currentPrice').value);
+  const mu = parseFloat(document.getElementById('annualReturn').value) / 100;
+  const sigma = parseFloat(document.getElementById('annualVol').value) / 100;
+  const T = parseInt(document.getElementById('months').value);
+  const N = Math.min(Math.max(parseInt(document.getElementById('simCount').value), 1000), 100000);
+  const catalystPct = parseFloat(document.getElementById('catalystPremium').value) / 100;
+
+  const dt = 1 / 12; // 월별 스텝
+  const steps = T;
+  const drift = (mu - 0.5 * sigma * sigma) * dt;
+  const diffusion = sigma * Math.sqrt(dt);
+
+  // 촉매 이벤트: 시뮬레이션 기간 중 25% 확률로 한 번 발생
+  const catalystProb = 0.25;
+
+  allPaths = [];
+  allFinals = [];
+
+  const btn = document.getElementById('runBtn');
+  const status = document.getElementById('runStatus');
+  btn.disabled = true;
+  btn.textContent = '⏳ 연산 중...';
+  status.textContent = `${N.toLocaleString()}회 시뮬레이션 실행 중...`;
+
+  setTimeout(() => {
+    for (let i = 0; i < N; i++) {
+      const path = [S0];
+      let price = S0;
+      let catalystApplied = false;
+
+      for (let t = 0; t < steps; t++) {
+        const z = gaussianRandom();
+        price = price * Math.exp(drift + diffusion * z);
+
+        // 촉매 이벤트
+        if (!catalystApplied && Math.random() < catalystProb / steps) {
+          price *= (1 + catalystPct);
+          catalystApplied = true;
+        }
+
+        price = Math.max(price, 0.01); // 주가 바닥
+        path.push(price);
+      }
+
+      allPaths.push(path);
+      allFinals.push(price);
+    }
+
+    allFinals.sort((a, b) => a - b);
+
+    btn.disabled = false;
+    btn.textContent = '▶  시뮬레이션 실행';
+
+    const elapsed = '완료';
+    status.textContent = `✅ ${N.toLocaleString()}회 시뮬레이션 ${elapsed}`;
+
+    renderSummary(S0);
+    renderHistogram(S0);
+    renderPaths(S0);
+    renderProbTable(S0);
+
+    // 패널 표시
+    ['summaryRow','histPanel','pathPanel','tablePanel'].forEach(id => {
+      document.getElementById(id).style.display = '';
+    });
+  }, 50);
+}
+
+function percentile(arr, p) {
+  const idx = Math.floor(arr.length * p);
+  return arr[Math.min(idx, arr.length - 1)];
+}
+
+function renderSummary(S0) {
+  const median = percentile(allFinals, 0.5);
+  const mean = allFinals.reduce((a, b) => a + b, 0) / allFinals.length;
+  const p10 = percentile(allFinals, 0.1);
+  const p90 = percentile(allFinals, 0.9);
+
+  const prob10 = allFinals.filter(x => x >= 10).length / allFinals.length * 100;
+  const prob20 = allFinals.filter(x => x >= 20).length / allFinals.length * 100;
+
+  const fmt = v => '$' + v.toFixed(2);
+  const retFmt = v => {
+    const r = ((v - S0) / S0 * 100);
+    return (r >= 0 ? '+' : '') + r.toFixed(1) + '%';
+  };
+
+  document.getElementById('medianPrice').textContent = fmt(median);
+  document.getElementById('medianReturn').textContent = retFmt(median);
+  document.getElementById('meanPrice').textContent = fmt(mean);
+  document.getElementById('meanReturn').textContent = retFmt(mean);
+  document.getElementById('p10Price').textContent = fmt(p10);
+  document.getElementById('p10Return').textContent = retFmt(p10);
+  document.getElementById('p90Price').textContent = fmt(p90);
+  document.getElementById('p90Return').textContent = retFmt(p90);
+  document.getElementById('prob10').textContent = prob10.toFixed(1) + '%';
+  document.getElementById('prob20').textContent = prob20.toFixed(1) + '%';
+}
+
+function renderHistogram(S0) {
+  const canvas = document.getElementById('histCanvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+  const W = rect.width;
+  const H = rect.height;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // 히스토그램 계산
+  const bins = 60;
+  const maxPrice = percentile(allFinals, 0.98);
+  const minPrice = Math.max(percentile(allFinals, 0.02), 0);
+  const binWidth = (maxPrice - minPrice) / bins;
+
+  const counts = new Array(bins).fill(0);
+  allFinals.forEach(p => {
+    const idx = Math.min(Math.floor((p - minPrice) / binWidth), bins - 1);
+    if (idx >= 0) counts[idx]++;
+  });
+
+  const maxCount = Math.max(...counts);
+  const margin = { top: 20, right: 20, bottom: 40, left: 50 };
+  const cw = W - margin.left - margin.right;
+  const ch = H - margin.top - margin.bottom;
+  const barW = cw / bins;
+
+  // 바 그리기
+  counts.forEach((c, i) => {
+    const x = margin.left + i * barW;
+    const barH = (c / maxCount) * ch;
+    const y = margin.top + ch - barH;
+    const price = minPrice + (i + 0.5) * binWidth;
+
+    // 색상: 현재가 대비
+    let color;
+    if (price < S0 * 0.8) color = 'rgba(248,113,113,0.7)';
+    else if (price < S0) color = 'rgba(251,191,36,0.6)';
+    else if (price < S0 * 2) color = 'rgba(52,211,153,0.6)';
+    else if (price < S0 * 5) color = 'rgba(96,165,250,0.7)';
+    else color = 'rgba(167,139,250,0.8)';
+
+    ctx.fillStyle = color;
+    ctx.fillRect(x + 0.5, y, barW - 1, barH);
+  });
+
+  // 현재가 라인
+  const curX = margin.left + ((S0 - minPrice) / (maxPrice - minPrice)) * cw;
+  if (curX > margin.left && curX < W - margin.right) {
+    ctx.strokeStyle = '#00d4ff';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 3]);
+    ctx.beginPath();
+    ctx.moveTo(curX, margin.top);
+    ctx.lineTo(curX, margin.top + ch);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#00d4ff';
+    ctx.font = '11px Courier New';
+    ctx.textAlign = 'center';
+    ctx.fillText('현재 $' + S0.toFixed(2), curX, margin.top - 4);
+  }
+
+  // X축
+  ctx.fillStyle = '#6b7280';
+  ctx.font = '10px Courier New';
+  ctx.textAlign = 'center';
+  for (let i = 0; i <= 6; i++) {
+    const price = minPrice + (maxPrice - minPrice) * i / 6;
+    const x = margin.left + (i / 6) * cw;
+    ctx.fillText('$' + price.toFixed(1), x, H - margin.bottom + 16);
+  }
+
+  // Y축
+  ctx.textAlign = 'right';
+  for (let i = 0; i <= 4; i++) {
+    const count = (maxCount * i / 4);
+    const pct = (count / allFinals.length * 100).toFixed(1);
+    const y = margin.top + ch - (i / 4) * ch;
+    ctx.fillText(pct + '%', margin.left - 6, y + 3);
+
+    ctx.strokeStyle = '#1e2d45';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(margin.left, y);
+    ctx.lineTo(W - margin.right, y);
+    ctx.stroke();
+  }
+
+  // 축 라벨
+  ctx.fillStyle = '#9ca3af';
+  ctx.font = '11px Segoe UI';
+  ctx.textAlign = 'center';
+  ctx.fillText('최종 주가 ($)', W / 2, H - 4);
+}
+
+function renderPaths(S0) {
+  const canvas = document.getElementById('pathCanvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+  const W = rect.width;
+  const H = rect.height;
+
+  ctx.clearRect(0, 0, W, H);
+
+  const margin = { top: 20, right: 20, bottom: 30, left: 50 };
+  const cw = W - margin.left - margin.right;
+  const ch = H - margin.top - margin.bottom;
+
+  // 50개 랜덤 샘플 경로
+  const sampleCount = 50;
+  const indices = [];
+  for (let i = 0; i < sampleCount; i++) {
+    indices.push(Math.floor(Math.random() * allPaths.length));
+  }
+
+  // 최대/최소 가격 결정
+  let maxP = S0 * 2;
+  let minP = S0 * 0.1;
+  indices.forEach(idx => {
+    allPaths[idx].forEach(p => {
+      maxP = Math.max(maxP, p);
+      minP = Math.min(minP, p);
+    });
+  });
+  maxP *= 1.05;
+
+  const steps = allPaths[0].length;
+
+  // 그리드
+  ctx.strokeStyle = '#1e2d45';
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i <= 4; i++) {
+    const y = margin.top + (i / 4) * ch;
+    ctx.beginPath();
+    ctx.moveTo(margin.left, y);
+    ctx.lineTo(W - margin.right, y);
+    ctx.stroke();
+  }
+
+  // 경로 그리기
+  indices.forEach(idx => {
+    const path = allPaths[idx];
+    const finalP = path[path.length - 1];
+    const ratio = finalP / S0;
+
+    if (ratio >= 5) ctx.strokeStyle = 'rgba(167,139,250,0.35)';
+    else if (ratio >= 2) ctx.strokeStyle = 'rgba(52,211,153,0.3)';
+    else if (ratio >= 1) ctx.strokeStyle = 'rgba(96,165,250,0.25)';
+    else ctx.strokeStyle = 'rgba(248,113,113,0.25)';
+
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    path.forEach((p, t) => {
+      const x = margin.left + (t / (steps - 1)) * cw;
+      const y = margin.top + ch - ((p - minP) / (maxP - minP)) * ch;
+      t === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+  });
+
+  // 현재가 라인
+  const curY = margin.top + ch - ((S0 - minP) / (maxP - minP)) * ch;
+  ctx.strokeStyle = '#00d4ff';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([4, 3]);
+  ctx.beginPath();
+  ctx.moveTo(margin.left, curY);
+  ctx.lineTo(W - margin.right, curY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Y축 라벨
+  ctx.fillStyle = '#6b7280';
+  ctx.font = '10px Courier New';
+  ctx.textAlign = 'right';
+  for (let i = 0; i <= 4; i++) {
+    const price = minP + (maxP - minP) * (1 - i / 4);
+    const y = margin.top + (i / 4) * ch;
+    ctx.fillText('$' + price.toFixed(1), margin.left - 6, y + 3);
+  }
+
+  // X축 라벨
+  ctx.textAlign = 'center';
+  const T = parseInt(document.getElementById('months').value);
+  for (let i = 0; i <= 4; i++) {
+    const month = Math.round(T * i / 4);
+    const x = margin.left + (i / 4) * cw;
+    ctx.fillText(month + '개월', x, H - margin.bottom + 16);
+  }
+}
+
+function renderProbTable(S0) {
+  const tbody = document.getElementById('probTableBody');
+
+  const targets = [
+    { price: S0 * 0.5, label: '50% 하락' },
+    { price: S0 * 0.8, label: '20% 하락' },
+    { price: S0, label: '현재가 유지' },
+    { price: 5, label: '$5' },
+    { price: 7.5, label: '$7.50', note: 'PSU 1단계' },
+    { price: 10, label: '$10' },
+    { price: 12.5, label: '$12.50', note: 'PSU 2단계' },
+    { price: 15, label: '$15' },
+    { price: 20, label: '$20', note: 'PSU 3단계' },
+    { price: 30, label: '$30' },
+    { price: 50, label: '$50' },
+    { price: 100, label: '$100' },
+  ];
+
+  let html = '';
+  targets.forEach(t => {
+    const prob = allFinals.filter(x => x >= t.price).length / allFinals.length * 100;
+    const ret = ((t.price - S0) / S0 * 100);
+    const retStr = (ret >= 0 ? '+' : '') + ret.toFixed(0) + '%';
+
+    let barColor, evalText, evalColor;
+    if (prob >= 70) { barColor = '#10b981'; evalText = '매우 높음'; evalColor = '#10b981'; }
+    else if (prob >= 40) { barColor = '#3b82f6'; evalText = '높음'; evalColor = '#3b82f6'; }
+    else if (prob >= 20) { barColor = '#f59e0b'; evalText = '보통'; evalColor = '#f59e0b'; }
+    else if (prob >= 5) { barColor = '#fb923c'; evalText = '낮음'; evalColor = '#fb923c'; }
+    else { barColor = '#f87171'; evalText = '희박'; evalColor = '#f87171'; }
+
+    const noteTag = t.note ? ` <span style="color:var(--purple-light);font-size:10px;">(${t.note})</span>` : '';
+    const isCurrentRow = t.price === S0;
+    const rowStyle = isCurrentRow ? ' style="background:#0a1520;"' : '';
+
+    html += `<tr${rowStyle}>
+      <td><strong>${t.label}</strong>${noteTag}</td>
+      <td class="num" style="color:${barColor}; font-weight:700;">${prob.toFixed(1)}%</td>
+      <td class="num">${retStr}</td>
+      <td class="prob-bar-cell">
+        <div class="prob-bar-bg">
+          <div class="prob-bar-fill" style="width:${prob}%; background:${barColor};"></div>
+        </div>
+      </td>
+      <td style="color:${evalColor}; font-weight:600; font-size:12px;">${evalText}</td>
+    </tr>`;
+  });
+
+  tbody.innerHTML = html;
+}
+
+// 윈도우 리사이즈 대응
+window.addEventListener('resize', () => {
+  if (allFinals.length > 0) {
+    const S0 = parseFloat(document.getElementById('currentPrice').value);
+    renderHistogram(S0);
+    renderPaths(S0);
+  }
+});
+</script>
+
+</body>
+</html>

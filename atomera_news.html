@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atomera 뉴스 · 촉매 피드</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #0f0f1a;
+    --border: #1e2030;
+    --text: #e2e8f0;
+    --muted: #9ca3af;
+    --accent: #6ee7b7;
+    --yellow: #fbbf24;
+    --purple: #a78bfa;
+    --blue: #60a5fa;
+    --red: #f87171;
+    --green: #34d399;
+    --orange: #fb923c;
+    --cyan: #22d3ee;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Segoe UI', sans-serif;
+    min-height: 100vh; padding: 24px;
+  }
+
+  .page-title { font-size: 22px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+  .page-sub { font-size: 12px; color: var(--muted); margin-bottom: 24px; font-family: 'Courier New', monospace; }
+
+  /* ── 필터 바 ── */
+  .filter-bar {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 20px; align-items: center;
+  }
+  .filter-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  .filter-btn:hover { border-color: #3a3a5a; color: var(--text); }
+  .filter-btn.active {
+    background: #12122a;
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* ── 타임라인 ── */
+  .timeline {
+    position: relative;
+    padding-left: 32px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent), var(--border));
+    border-radius: 1px;
+  }
+
+  .tl-group {
+    margin-bottom: 32px;
+  }
+  .tl-group-title {
+    font-size: 13px; font-weight: 700;
+    color: var(--muted);
+    font-family: 'Courier New', monospace;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+    position: relative;
+  }
+  .tl-group-title::before {
+    content: '';
+    position: absolute;
+    left: -28px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--accent);
+  }
+
+  .tl-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tl-item:hover { border-color: #3a3a5a; transform: translateX(4px); }
+  .tl-item.expanded { border-color: var(--accent); }
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -26px;
+    top: 20px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--muted);
+  }
+
+  .tl-item.catalyst-high::before { background: var(--green); box-shadow: 0 0 8px rgba(52,211,153,0.5); }
+  .tl-item.catalyst-medium::before { background: var(--yellow); }
+  .tl-item.catalyst-low::before { background: var(--muted); }
+
+  .tl-header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .tl-date {
+    font-size: 11px; color: var(--muted);
+    font-family: 'Courier New', monospace;
+    min-width: 80px;
+  }
+  .tl-badge {
+    font-size: 10px; padding: 2px 8px; border-radius: 4px;
+    font-family: 'Courier New', monospace; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .badge-contract { background: #0a2010; color: #34d399; }
+  .badge-earnings { background: #1a1200; color: #fbbf24; }
+  .badge-tech { background: #0a0a2a; color: #60a5fa; }
+  .badge-hire { background: #1a0a2a; color: #a78bfa; }
+  .badge-event { background: #1a0a10; color: #fb923c; }
+  .badge-filing { background: #0a1a1a; color: #22d3ee; }
+  .badge-catalyst { background: #200a10; color: #f87171; }
+  .badge-partnership { background: #0a1520; color: #38bdf8; }
+
+  .tl-title {
+    font-size: 14px; font-weight: 600;
+    color: var(--text);
+    margin-left: auto;
+    flex: 1;
+  }
+  .tl-impact {
+    font-size: 10px;
+    font-family: 'Courier New', monospace;
+    padding: 2px 8px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .impact-high { background: rgba(52,211,153,0.15); color: #34d399; }
+  .impact-medium { background: rgba(251,191,36,0.15); color: #fbbf24; }
+  .impact-low { background: rgba(156,163,175,0.15); color: #9ca3af; }
+
+  .tl-body {
+    display: none;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .tl-item.expanded .tl-body { display: block; }
+
+  .tl-desc {
+    font-size: 12px; color: var(--muted); line-height: 1.7;
+    margin-bottom: 8px;
+  }
+  .tl-analysis {
+    background: #0a1a12;
+    border-radius: 6px;
+    border-left: 2px solid var(--green);
+    padding: 8px 12px;
+    font-size: 11px;
+    color: var(--green);
+    line-height: 1.6;
+  }
+  .tl-analysis-title {
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 4px;
+    font-size: 10px;
+    font-family: 'Courier New', monospace;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .tl-arrow {
+    float: right;
+    font-size: 12px;
+    color: var(--muted);
+    transition: transform 0.2s;
+  }
+  .tl-item.expanded .tl-arrow { transform: rotate(180deg); }
+
+  /* ── 촉매 카운트다운 ── */
+  .catalyst-section {
+    margin-bottom: 28px;
+  }
+  .section-title {
+    font-size: 13px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+  .catalyst-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .cat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .cat-card.urgent::before { background: linear-gradient(90deg, #f87171, #fb923c); }
+  .cat-card.soon::before { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+  .cat-card.upcoming::before { background: linear-gradient(90deg, #34d399, #10b981); }
+
+  .cat-label {
+    font-size: 10px; color: var(--muted);
+    font-family: 'Courier New', monospace;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .cat-title {
+    font-size: 15px; font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .cat-countdown {
+    font-size: 22px; font-weight: 700;
+    font-family: 'Courier New', monospace;
+    margin: 8px 0;
+  }
+  .cat-desc {
+    font-size: 11px; color: var(--muted); line-height: 1.6;
+  }
+  .cat-impact-row {
+    display: flex; gap: 8px; margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .cat-impact-tag {
+    font-size: 10px; padding: 2px 8px; border-radius: 4px;
+    font-family: 'Courier New', monospace; font-weight: 600;
+  }
+
+  /* ── Pulse 애니메이션 ── */
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  .pulse { animation: pulse 2s infinite; }
+
+  @media (min-width:641px) { body { zoom: 1.2; } }
+</style>
+</head>
+<body>
+
+<div class="page-title">📰 뉴스 · 촉매 피드</div>
+<div class="page-sub">Atomera 핵심 이벤트 타임라인 + 다가오는 촉매 이벤트 카운트다운</div>
+
+<!-- 촉매 카운트다운 -->
+<div class="section-title">⏳ 다가오는 촉매 이벤트</div>
+<div class="catalyst-grid" id="catalystGrid"></div>
+
+<!-- 필터 -->
+<div class="section-title">📋 전체 이벤트 피드</div>
+<div class="filter-bar" id="filterBar">
+  <button class="filter-btn active" data-filter="all">전체</button>
+  <button class="filter-btn" data-filter="contract">계약/매출</button>
+  <button class="filter-btn" data-filter="tech">기술/특허</button>
+  <button class="filter-btn" data-filter="earnings">실적/IR</button>
+  <button class="filter-btn" data-filter="hire">인재 영입</button>
+  <button class="filter-btn" data-filter="partnership">파트너십</button>
+  <button class="filter-btn" data-filter="catalyst">촉매/이벤트</button>
+</div>
+
+<!-- 타임라인 -->
+<div class="timeline" id="timeline"></div>
+
+<script>
+// === 촉매 이벤트 데이터 ===
+const CATALYSTS = [
+  {
+    title: '삼성 18A MST 채택 공식 발표',
+    expected: '2026 Q3~Q4',
+    daysAway: 150,
+    urgency: 'soon',
+    impact: 'EXTREME',
+    impactColor: '#f87171',
+    desc: 'Phase 4 완료 후 GAA 18A 노드에 MST 공식 채택 결정. 주가 최대 촉매.',
+    tags: [
+      { text: '주가 영향: +200~500%', color: '#f87171', bg: '#200a0a' },
+      { text: '확률: 55~65%', color: '#fbbf24', bg: '#1a1200' }
+    ]
+  },
+  {
+    title: '2026 Q2 실적 발표',
+    expected: '2026년 8월 초',
+    daysAway: 95,
+    urgency: 'soon',
+    impact: 'HIGH',
+    impactColor: '#34d399',
+    desc: 'Infineon GaN 첫 분기 매출 + 상업 파이프라인 업데이트. 계약 건수 가이던스 주목.',
+    tags: [
+      { text: '주가 영향: ±20~40%', color: '#fbbf24', bg: '#1a1200' },
+      { text: '확률: 100%', color: '#34d399', bg: '#0a2010' }
+    ]
+  },
+  {
+    title: 'AMAT 공동 마케팅 첫 고객 확보',
+    expected: '2026 H2',
+    daysAway: 180,
+    urgency: 'upcoming',
+    impact: 'HIGH',
+    impactColor: '#60a5fa',
+    desc: 'Applied Materials와 MST 공동 플랫폼을 통해 첫 신규 파운드리 계약 발표.',
+    tags: [
+      { text: '주가 영향: +30~80%', color: '#34d399', bg: '#0a2010' },
+      { text: '확률: 40~50%', color: '#fb923c', bg: '#1a0e00' }
+    ]
+  },
+  {
+    title: 'Intel 18A 평가 결과',
+    expected: '2026 Q4~2027 Q1',
+    daysAway: 270,
+    urgency: 'upcoming',
+    impact: 'HIGH',
+    impactColor: '#a78bfa',
+    desc: 'Intel Foundry Services 18A 노드에서 MST 평가 진행 중. 채택 시 2번째 빅딜.',
+    tags: [
+      { text: '주가 영향: +100~300%', color: '#f87171', bg: '#200a0a' },
+      { text: '확률: 30~40%', color: '#fb923c', bg: '#1a0e00' }
+    ]
+  },
+  {
+    title: 'Synopsys GaN PDK 상용화',
+    expected: '2026 Q3',
+    daysAway: 120,
+    urgency: 'soon',
+    impact: 'MEDIUM',
+    impactColor: '#fbbf24',
+    desc: 'Synopsys 설계 툴에 MST GaN PDK 정식 통합. Fabless 고객 접근성 대폭 확대.',
+    tags: [
+      { text: '주가 영향: +10~25%', color: '#fbbf24', bg: '#1a1200' },
+      { text: '확률: 75%', color: '#34d399', bg: '#0a2010' }
+    ]
+  },
+];
+
+// === 뉴스/이벤트 데이터 ===
+const EVENTS = [
+  {
+    date: '2026-04-28',
+    type: 'catalyst',
+    title: 'SEMICON Korea 2026 참가 — AMAT 공동 부스 운영',
+    impact: 'medium',
+    catalystLevel: 'medium',
+    desc: 'Atomera가 Applied Materials와 공동으로 SEMICON Korea에서 MST 기술을 시연. 삼성·SK하이닉스 엔지니어 다수 방문.',
+    analysis: '한국 반도체 생태계에 직접 노출. 삼성 내부 MST 인지도 제고 효과. 실제 계약까지는 시간 필요하나 긍정적 시그널.'
+  },
+  {
+    date: '2026-04-15',
+    type: 'earnings',
+    title: '2026 Q1 실적 발표 — 매출 $52K, 현금 $28M',
+    impact: 'medium',
+    catalystLevel: 'medium',
+    desc: 'Q1 매출 $52K (Infineon GaN 라이선싱). 순손실 $2.8M. 현금 $28M으로 2~3년 런웨이 확보. 상업 파이프라인 "복수 고객 협상 중" 언급.',
+    analysis: '매출 자체는 소규모이나, 첫 상업매출 지속 확인이 핵심. "복수 고객 협상 중"이 구체화되면 모멘텀 가속. 현금 여유 충분.'
+  },
+  {
+    date: '2026-03-18',
+    type: 'tech',
+    title: 'MST 특허 4건 추가 등록 — 미국·유럽',
+    impact: 'low',
+    catalystLevel: 'low',
+    desc: 'GAA 트랜지스터 채널 이동도 개선 관련 특허 4건이 미국과 유럽에서 동시 등록. 총 특허 수 107건으로 확대.',
+    analysis: 'IP 해자 강화. 경쟁사 대안 기술 개발 시 우회 어려움 증가. 직접적 주가 촉매보다는 장기적 포지션 강화.'
+  },
+  {
+    date: '2026-02-24',
+    type: 'hire',
+    title: 'Nishant Sinha VP Marketing 영입 (AMAT·Lam·Micron 출신, 특허 111건)',
+    impact: 'high',
+    catalystLevel: 'high',
+    desc: '반도체 장비·재료 업계 베테랑 합류. Applied Materials, Lam Research, Micron에서 근무. 개인 특허 111건 보유자.',
+    analysis: 'AMAT 파트너십 실행력 강화의 구체적 증거. 이 급의 인재가 30명 소형 기업에 합류한 것은 상업화 임박 시그널로 해석 가능.'
+  },
+  {
+    date: '2026-02-10',
+    type: 'hire',
+    title: 'Wei Na 이사 영입 (전 Cypress/Infineon, 플래시 IP 18년)',
+    impact: 'medium',
+    catalystLevel: 'medium',
+    desc: '플래시 메모리 IP 라이선싱 18년 경력의 Wei Na가 이사로 합류. Cypress Semiconductor → Infineon 인수 시 IP 사업부 이끈 경력.',
+    analysis: 'IP 라이선싱 비즈니스의 핵심 역량 보강. 실제 계약 협상에 직접적 기여 가능한 인물.'
+  },
+  {
+    date: '2026-01-28',
+    type: 'filing',
+    title: '$25M 자금조달 완료 — Heights Capital 참여',
+    impact: 'medium',
+    catalystLevel: 'low',
+    desc: '총 $25M 규모 자금조달 완료. Heights Capital Management(SIG 계열, 5.8% 지분)이 참여. 런웨이 2~3년 확보.',
+    analysis: '기관 투자자의 지속적 참여는 기술 검증 신뢰도. 희석 우려 있으나 런웨이 확보가 더 중요한 시점. 상업화까지 자금 걱정 해소.'
+  },
+  {
+    date: '2025-12-16',
+    type: 'partnership',
+    title: 'Applied Materials와 공동 마케팅 프로그램 착수',
+    impact: 'high',
+    catalystLevel: 'high',
+    desc: 'AMAT의 에피택시 장비와 Atomera MST를 결합한 공동 솔루션으로 파운드리·IDM에 영업 개시. AMAT 글로벌 영업망 활용.',
+    analysis: '시가총액 $150B AMAT이 $50M 기업과 공식 파트너십 = 기술 검증. AMAT 채널을 통해 삼성·TSMC·Intel 외 2~3Tier 파운드리 접근 가능.'
+  },
+  {
+    date: '2025-11-05',
+    type: 'contract',
+    title: 'Infineon GaN 라이선싱 첫 상업매출 시작',
+    impact: 'high',
+    catalystLevel: 'high',
+    desc: 'Infineon의 GaN 전력소자 생산라인에서 MST 적용 웨이퍼 양산 출하 시작. Atomera 최초 상업매출 확인.',
+    analysis: '0 → 1 전환의 역사적 순간. 기술 기업에서 매출 기업으로 전환. 금액보다 "상업적 검증" 자체가 가치. 후속 계약 레퍼런스.'
+  },
+  {
+    date: '2025-09-22',
+    type: 'tech',
+    title: 'IEDM 2025 논문 채택 — GAA 노드 MST 효과 검증',
+    impact: 'medium',
+    catalystLevel: 'medium',
+    desc: 'IEEE IEDM에서 Atomera 공저 논문 발표. GAA 2nm급 노드에서 MST 적용 시 전자 이동도 35% 향상, 누설 전류 40% 감소 실증.',
+    analysis: '학계 최고 권위 학회에서 피어리뷰 통과 = 기술적 신뢰도 최상급. 삼성·Intel 의사결정자들에게 직접적 레퍼런스.'
+  },
+  {
+    date: '2025-08-12',
+    type: 'catalyst',
+    title: '삼성 18A Phase 4 진입 확인 — 양산 직전 단계',
+    impact: 'high',
+    catalystLevel: 'high',
+    desc: '삼성이 MST 기술을 18A(1.8nm) GAA 공정에서 Phase 4 평가에 진입. Phase 4는 양산 결정 직전 최종 검증 단계.',
+    analysis: '주가 핵심 촉매. Phase 4 = 기술적 검증 사실상 완료, 사업적 결정만 남은 상태. 삼성의 TSMC 추격 전략에서 MST는 차별화 카드.'
+  },
+  {
+    date: '2025-06-20',
+    type: 'partnership',
+    title: 'Synopsys GaN PDK 공동개발 착수',
+    impact: 'medium',
+    catalystLevel: 'medium',
+    desc: 'EDA 업계 최대 기업 Synopsys와 MST GaN 공정 PDK(Process Design Kit) 공동 개발 합의. Fabless 설계사가 직접 MST 활용 가능.',
+    analysis: '설계 생태계 진입 = 수요 풀(Pull) 전략. 파운드리 Push + 설계사 Pull 양면 전략 완성. GaN 시장 확대에 구조적 수혜.'
+  },
+];
+
+// === 촉매 카운트다운 렌더링 ===
+function renderCatalysts() {
+  const grid = document.getElementById('catalystGrid');
+  let html = '';
+
+  CATALYSTS.forEach(c => {
+    const daysText = c.daysAway <= 30 ? `D-${c.daysAway}` : `~${c.daysAway}일 후`;
+    const daysColor = c.daysAway <= 60 ? '#f87171' : c.daysAway <= 120 ? '#fbbf24' : '#34d399';
+    const pulseClass = c.daysAway <= 60 ? 'pulse' : '';
+
+    let tagsHtml = '';
+    c.tags.forEach(t => {
+      tagsHtml += `<span class="cat-impact-tag" style="background:${t.bg};color:${t.color};">${t.text}</span>`;
+    });
+
+    html += `
+    <div class="cat-card ${c.urgency}">
+      <div class="cat-label">${c.expected}</div>
+      <div class="cat-title">${c.title}</div>
+      <div class="cat-countdown ${pulseClass}" style="color:${daysColor};">${daysText}</div>
+      <div class="cat-desc">${c.desc}</div>
+      <div class="cat-impact-row">
+        <span class="cat-impact-tag" style="background:rgba(${c.impactColor === '#f87171' ? '248,113,113' : c.impactColor === '#34d399' ? '52,211,153' : c.impactColor === '#60a5fa' ? '96,165,250' : c.impactColor === '#a78bfa' ? '167,139,250' : '251,191,36'},0.15); color:${c.impactColor};">영향도: ${c.impact}</span>
+        ${tagsHtml}
+      </div>
+    </div>`;
+  });
+
+  grid.innerHTML = html;
+}
+
+// === 타임라인 렌더링 ===
+function renderTimeline(filter = 'all') {
+  const timeline = document.getElementById('timeline');
+
+  // 필터링
+  const filtered = filter === 'all' ? EVENTS : EVENTS.filter(e => e.type === filter);
+
+  // 월별 그룹핑
+  const groups = {};
+  filtered.forEach(e => {
+    const monthKey = e.date.substring(0, 7); // YYYY-MM
+    if (!groups[monthKey]) groups[monthKey] = [];
+    groups[monthKey].push(e);
+  });
+
+  const badgeClass = {
+    contract: 'badge-contract',
+    earnings: 'badge-earnings',
+    tech: 'badge-tech',
+    hire: 'badge-hire',
+    event: 'badge-event',
+    filing: 'badge-filing',
+    catalyst: 'badge-catalyst',
+    partnership: 'badge-partnership',
+  };
+  const badgeText = {
+    contract: '계약/매출',
+    earnings: '실적/IR',
+    tech: '기술/특허',
+    hire: '인재 영입',
+    event: '이벤트',
+    filing: 'SEC 공시',
+    catalyst: '촉매',
+    partnership: '파트너십',
+  };
+  const impactClass = {
+    high: 'impact-high',
+    medium: 'impact-medium',
+    low: 'impact-low',
+  };
+  const impactText = {
+    high: '🔥 HIGH',
+    medium: '⚡ MEDIUM',
+    low: '📌 LOW',
+  };
+
+  const monthNames = {
+    '01': '1월', '02': '2월', '03': '3월', '04': '4월',
+    '05': '5월', '06': '6월', '07': '7월', '08': '8월',
+    '09': '9월', '10': '10월', '11': '11월', '12': '12월',
+  };
+
+  let html = '';
+
+  const sortedKeys = Object.keys(groups).sort().reverse();
+  sortedKeys.forEach(monthKey => {
+    const [year, month] = monthKey.split('-');
+    html += `<div class="tl-group">
+      <div class="tl-group-title">${year}년 ${monthNames[month]}</div>`;
+
+    groups[monthKey].forEach((e, i) => {
+      const itemId = `item-${monthKey}-${i}`;
+      html += `
+      <div class="tl-item catalyst-${e.catalystLevel}" id="${itemId}" onclick="toggleItem('${itemId}')">
+        <span class="tl-arrow">▼</span>
+        <div class="tl-header">
+          <span class="tl-date">${e.date}</span>
+          <span class="tl-badge ${badgeClass[e.type]}">${badgeText[e.type]}</span>
+          <span class="tl-title">${e.title}</span>
+          <span class="tl-impact ${impactClass[e.impact]}">${impactText[e.impact]}</span>
+        </div>
+        <div class="tl-body">
+          <div class="tl-desc">${e.desc}</div>
+          <div class="tl-analysis">
+            <div class="tl-analysis-title">📊 투자 분석</div>
+            ${e.analysis}
+          </div>
+        </div>
+      </div>`;
+    });
+
+    html += `</div>`;
+  });
+
+  if (filtered.length === 0) {
+    html = '<div style="text-align:center;color:var(--muted);padding:40px;">해당 카테고리의 이벤트가 없습니다</div>';
+  }
+
+  timeline.innerHTML = html;
+}
+
+function toggleItem(id) {
+  document.getElementById(id).classList.toggle('expanded');
+}
+
+// === 필터 바 이벤트 ===
+document.getElementById('filterBar').addEventListener('click', e => {
+  if (e.target.classList.contains('filter-btn')) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    renderTimeline(e.target.dataset.filter);
+  }
+});
+
+// === 초기 렌더 ===
+renderCatalysts();
+renderTimeline();
+</script>
+
+</body>
+</html>
