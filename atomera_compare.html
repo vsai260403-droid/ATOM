@@ -427,7 +427,8 @@ function initScaffold() {
 }
 
 // ── 실시간 fetch + 렌더 ──
-let fetchedData = COMPANIES.map(c => ({ ...c, psr: calcPSR(c.mktcap, c.revenue), live: false }));
+// fetch 전 초기 상태: mktcap=null, psr=null, live=false
+let fetchedData = COMPANIES.map(c => ({ ...c, mktcap: null, psr: null, live: false }));
 
 async function refreshAll() {
   const btn = document.getElementById('compareRefreshBtn');
@@ -442,8 +443,9 @@ async function refreshAll() {
         const cached = loadAtomCache();
         if (cached) { liveCap = cached.mktcapM / 1000; }
       }
-      const mktcap  = liveCap !== null ? liveCap : c.mktcap;
-      const psr     = calcPSR(mktcap, c.revenue);
+      // 완전 실패 시 mktcap=null 유지 → '--' 표시
+      const mktcap = liveCap !== null ? liveCap : null;
+      const psr    = calcPSR(mktcap, c.revenue);
       return { ...c, mktcap, psr, live: liveCap !== null };
     })
   );
@@ -454,30 +456,40 @@ async function refreshAll() {
 
   // 요약 카드 — Atomera PSR 업데이트
   const atom = results.find(c => c.ticker === 'ATOM');
+  const sumVal = document.querySelector('.sum-card:nth-child(1) .sum-value');
+  const sumSub = document.querySelector('.sum-card:nth-child(1) .sum-sub');
   if (atom && atom.psr !== null) {
-    document.querySelector('.sum-card:nth-child(1) .sum-value').textContent = '~' + atom.psr.toFixed(0) + 'x';
-    document.querySelector('.sum-card:nth-child(1) .sum-sub').textContent =
-      '시총 ' + fmt(atom.mktcap) + ' / 매출 ' + fmt(atom.revenue);
+    if (sumVal) sumVal.textContent = '~' + atom.psr.toFixed(0) + 'x';
+    if (sumSub) sumSub.textContent = '시총 ' + fmt(atom.mktcap) + ' / 매출 ' + fmt(atom.revenue);
+  } else {
+    if (sumVal) sumVal.textContent = '--';
+    if (sumSub) sumSub.textContent = '실시간 fetch 실패 · 재시도 버튼 클릭';
   }
 
   const liveCount = results.filter(c => c.live).length;
   const total     = results.filter(c => c.ticker !== '—').length;
+  const failCount = total - liveCount;
   const ts        = new Date().toLocaleTimeString('ko-KR', { hour:'2-digit', minute:'2-digit' });
   document.getElementById('compareNote').innerHTML =
     `※ 시가총액 실시간 반영 ${liveCount}/${total}개 · ${ts} 기준 (Yahoo Finance)<br>
-     ※ ●LIVE = 실시간 시총 · ○기준 = 폴백 데이터<br>
+     ※ ●LIVE = 실시간 시총 · ○폴백 = fetch 실패 (-- 표시)<br>
      ※ 연매출은 최근 분기 공개 데이터 기준 · PSR = 실시간 시총 ÷ 연매출`;
 
   if (btn) {
-    btn.textContent = liveCount === total ? `✓ ${liveCount}/${total} LIVE` : `⚠ ${liveCount}/${total} LIVE`;
-    btn.style.color  = liveCount >= total * 0.7 ? '#34d399' : '#f59e0b';
+    if (liveCount === 0) {
+      btn.textContent = '⟳ 재시도'; btn.style.color = '#f59e0b';
+    } else if (failCount > 0) {
+      btn.textContent = `⚠ ${liveCount}/${total} LIVE · 재시도`; btn.style.color = '#f59e0b';
+    } else {
+      btn.textContent = `✓ ${liveCount}/${total} LIVE`; btn.style.color = '#34d399';
+    }
     btn.disabled = false;
   }
 }
 
 // ── 초기화 ──
 initScaffold();
-renderTable(fetchedData);   // 폴백값으로 즉시 렌더
+renderTable(fetchedData);   // -- 상태로 즉시 렌더
 renderScatter(fetchedData);
 refreshAll();               // 비동기 실시간 업데이트
 </script>
