@@ -1543,13 +1543,19 @@ const ATOM_CACHE_KEY = 'ATOM_LIVE_CACHE';
 const ATOM_CACHE_TTL = 5 * 60 * 1000;
 function saveAtomCache(d) { try { localStorage.setItem(ATOM_CACHE_KEY, JSON.stringify({...d, ts: Date.now()})); } catch(e) {} }
 function loadAtomCache() { try { const c = JSON.parse(localStorage.getItem(ATOM_CACHE_KEY)); if (c && Date.now() - c.ts < ATOM_CACHE_TTL) return c; } catch(e) {} return null; }
+async function proxyFetch(url) {
+  const proxies = [
+    r => fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(r), {signal:AbortSignal.timeout(7000)}).then(x=>x.json()).then(j=>j.contents),
+    r => fetch('https://corsproxy.io/?' + encodeURIComponent(r), {signal:AbortSignal.timeout(7000)}).then(x=>x.text()),
+  ];
+  for (const p of proxies) { try { const t = await p(url); if (t) return t; } catch(e) {} }
+  return null;
+}
 async function fetchAtomLive() {
-  const proxy = 'https://api.allorigins.win/get?url=';
   const url = 'https://query1.finance.yahoo.com/v8/finance/chart/ATOM?interval=1d&range=1d';
   try {
-    const r = await fetch(proxy + encodeURIComponent(url), { signal: AbortSignal.timeout(6000) });
-    const j = await r.json();
-    const m = JSON.parse(j.contents).chart.result[0].meta;
+    const text = await proxyFetch(url);
+    const m = JSON.parse(text).chart.result[0].meta;
     const price = m.regularMarketPrice || m.regularMarketPreviousClose || ATOM_FALLBACK.price;
     const shares = ATOM_FALLBACK.shares;
     const mktcapM = Math.round(shares * price);
