@@ -358,18 +358,18 @@ function renderTable(data) {
       : 'background:#1e2d45;border:1px solid #f59e0b;color:#f59e0b;font-size:10px;cursor:pointer;padding:1px 5px;border-radius:3px;font-family:inherit';
     const btnTxt  = c.live ? '✓' : '⟳';
     const btnClick = c.live ? '' : `onclick="retryOne('${c.ticker}')"`;
+    const mktCell = c.ticker === '—'
+      ? `<td class="num">${mktTxt}</td>`
+      : `<td class="num"><div style="display:flex;align-items:center;justify-content:flex-end;gap:4px">${mktTxt}<button id="${btnId}" ${btnClick} style="${btnStyle}">${btnTxt}</button></div></td>`;
     tbody.innerHTML += `
       <tr class="${hl}">
         <td>
           <div class="company-name">${c.name}</div>
-          <div class="company-ticker" style="display:flex;align-items:center;gap:4px">
-            ${c.ticker}
-            <button id="${btnId}" ${btnClick} style="${btnStyle}">${btnTxt}</button>
-          </div>
+          <div class="company-ticker">${c.ticker}</div>
           <div class="company-type"><span class="tag ${tagClass(c.type)}">${c.typeLabel}</span></div>
         </td>
         <td style="font-size:11px;color:var(--muted);max-width:160px">${c.note}</td>
-        <td class="num">${mktTxt}</td>
+        ${mktCell}
         <td class="num">${fmt(c.revenue)}</td>
         <td class="num" style="font-weight:700;color:${psrColor}">${psrTxt}</td>
         <td class="psr-bar-cell">
@@ -456,21 +456,22 @@ async function refreshAll() {
   const btn = document.getElementById('compareRefreshBtn');
   if (btn) { btn.textContent = '⟳ 로딩 중...'; btn.disabled = true; }
 
-  // 모든 티커 병렬 fetch
-  const results = await Promise.all(
-    COMPANIES.map(async c => {
-      let liveCap = await fetchMktcap(c.ticker);
-      // ATOM fetch 실패 시 localStorage 캐시 활용
-      if (liveCap === null && c.ticker === 'ATOM') {
-        const cached = loadAtomCache();
-        if (cached) { liveCap = cached.mktcapM / 1000; }
-      }
-      // 완전 실패 시 mktcap=null 유지 → '--' 표시
-      const mktcap = liveCap !== null ? liveCap : null;
-      const psr    = calcPSR(mktcap, c.revenue);
-      return { ...c, mktcap, psr, live: liveCap !== null };
-    })
-  );
+  // 순차 fetch (300ms 간격) - allorigins 레이트 리밋 회피
+  const results = [];
+  for (const c of COMPANIES) {
+    let liveCap = await fetchMktcap(c.ticker);
+    if (liveCap === null && c.ticker === 'ATOM') {
+      const cached = loadAtomCache();
+      if (cached) { liveCap = cached.mktcapM / 1000; }
+    }
+    const mktcap = liveCap !== null ? liveCap : null;
+    const psr    = calcPSR(mktcap, c.revenue);
+    results.push({ ...c, mktcap, psr, live: liveCap !== null });
+    // 중간 렌더 - 성공한 항목 즉시 반영
+    fetchedData = [...results, ...COMPANIES.slice(results.length).map(x => fetchedData.find(f => f.ticker === x.ticker) || { ...x, mktcap: null, psr: null, live: false })];
+    renderTable(fetchedData);
+    if (c.ticker !== COMPANIES[COMPANIES.length-1].ticker) await new Promise(r => setTimeout(r, 300));
+  }
 
   fetchedData = results;
   renderTable(results);
