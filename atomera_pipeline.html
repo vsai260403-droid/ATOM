@@ -1563,19 +1563,28 @@ async function refreshAtomPrice() {
   const btn = document.getElementById('plRefreshBtn');
   if (btn) { btn.textContent = '⟳ 로딩...'; btn.disabled = true; }
   const d = await fetchAtomLive();
+  const g = id => document.getElementById(id);
+  if (!d.live) {
+    if (g('plLivePrice'))  g('plLivePrice').textContent  = '--';
+    if (g('plLiveMktcap')) g('plLiveMktcap').textContent = '--';
+    if (g('plLive52w'))    g('plLive52w').textContent    = '--';
+    if (g('plLiveSrc'))    g('plLiveSrc').textContent    = '연결 실패';
+    if (g('plLiveShares')) g('plLiveShares').textContent = '--';
+    if (g('plLiveFooter')) g('plLiveFooter').textContent = '※ 실시간 연결 실패 — 재시도 버튼을 눌러주세요';
+    if (btn) { btn.textContent = '⟳ 재시도'; btn.disabled = false; btn.style.color = '#f59e0b'; }
+    return;
+  }
   const ps = '$' + d.price.toFixed(2);
   const ms = '$' + d.mktcapM + 'M';
-  const src = d.live ? ('실시간 · ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit',minute:'2-digit'})) : 'Yahoo Finance 2026.04.28 (캐시)';
-  const g = id => document.getElementById(id);
+  const src = '실시간 · ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit',minute:'2-digit'});
   if (g('plLivePrice'))  g('plLivePrice').textContent  = ps;
   if (g('plLiveMktcap')) g('plLiveMktcap').textContent = ms;
   if (g('plLive52w'))    g('plLive52w').textContent    = '$' + d.low52.toFixed(2) + ' ~ $' + d.high52.toFixed(2);
   if (g('plLiveSrc'))    g('plLiveSrc').textContent    = src;
-  const sharesStr = d.shares ? d.shares.toFixed(1) + 'M주' : '39.4M주';
+  const sharesStr = d.shares.toFixed(1) + 'M주';
   if (g('plLiveShares')) g('plLiveShares').textContent = '~' + sharesStr;
   if (g('plLiveFooter')) g('plLiveFooter').textContent = '※ 현재 주가 ' + ps + ' / 시총 ' + ms + ' / 주식수 ' + sharesStr + ' (' + src + ')';
-  if (btn) { btn.textContent = d.live ? '✓ 실시간' : '✗ 캐시'; btn.disabled = false;
-             btn.style.color = d.live ? '#34d399' : '#f59e0b'; }
+  if (btn) { btn.textContent = '✓ 실시간'; btn.disabled = false; btn.style.color = '#34d399'; }
 }
 refreshAtomPrice();
 </script>

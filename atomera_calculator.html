@@ -973,18 +973,21 @@ async function refreshCalcPrice() {
   const btn = document.getElementById('calcRefreshBtn');
   if (btn) { btn.textContent = '⟳ 로딩...'; btn.disabled = true; }
   const d = await fetchCalcLive();
+  if (!d.live) {
+    const note = document.getElementById('calcLiveNote');
+    if (note) note.textContent = '※ 실시간 연결 실패 — 재시도 버튼을 눌러주세요';
+    if (btn) { btn.textContent = '⟳ 재시도'; btn.disabled = false; btn.style.color = '#f59e0b'; }
+    return;
+  }
   const priceInp = document.getElementById('basePriceInput');
   const sharesInp = document.getElementById('sharesInput');
   if (priceInp) { priceInp.value = d.price.toFixed(2); state.basePrice = d.price; }
   if (sharesInp) { sharesInp.value = d.shares.toFixed(1); state.shares = d.shares; }
   calculate();
-  const src = d.live
-    ? ('실시간 · ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit',minute:'2-digit'}))
-    : '폴백값 (Yahoo 연결 실패)';
+  const src = '실시간 · ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit',minute:'2-digit'});
   const note = document.getElementById('calcLiveNote');
   if (note) note.textContent = '※ 현재 주가 $' + d.price.toFixed(2) + ' / 시총 $' + d.mktcapM + 'M / 주식수 ' + d.shares.toFixed(1) + 'M주 (' + src + ')';
-  if (btn) { btn.textContent = d.live ? '✓ 실시간' : '✗ 캐시'; btn.disabled = false;
-             btn.style.color = d.live ? '#34d399' : '#f59e0b'; }
+  if (btn) { btn.textContent = '✓ 실시간'; btn.disabled = false; btn.style.color = '#34d399'; }
 }
 refreshCalcPrice();
 </script>

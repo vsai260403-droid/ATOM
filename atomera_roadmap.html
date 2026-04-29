@@ -824,12 +824,17 @@ async function refreshRmPrice() {
   if (btn) { btn.textContent = '...'; btn.disabled = true; }
   const d = await fetchRmLive();
   const g = id => document.getElementById(id);
+  if (!d.live) {
+    if (g('rmLivePrice'))  g('rmLivePrice').textContent  = '--';
+    if (g('rmLiveMktcap')) g('rmLiveMktcap').textContent = '--';
+    if (g('rmLiveSrc'))    g('rmLiveSrc').textContent    = '연결 실패';
+    if (btn) { btn.textContent = '⟳ 재시도'; btn.disabled = false; btn.style.color = '#f59e0b'; }
+    return;
+  }
   if (g('rmLivePrice'))  g('rmLivePrice').textContent  = '$' + d.price.toFixed(2);
   if (g('rmLiveMktcap')) g('rmLiveMktcap').textContent = '$' + d.mktcapM + 'M';
-  const src = d.live ? new Date().toLocaleDateString('ko-KR', {month:'2-digit',day:'2-digit'}) + ' 실시간' : '캐시';
-  if (g('rmLiveSrc')) g('rmLiveSrc').textContent = src;
-  if (btn) { btn.textContent = d.live ? '✓' : '✗'; btn.disabled = false;
-             btn.style.color = d.live ? '#34d399' : '#f59e0b'; }
+  if (g('rmLiveSrc'))    g('rmLiveSrc').textContent    = new Date().toLocaleDateString('ko-KR', {month:'2-digit',day:'2-digit'}) + ' 실시간';
+  if (btn) { btn.textContent = '✓'; btn.disabled = false; btn.style.color = '#34d399'; }
 }
 refreshRmPrice();
 </script>
