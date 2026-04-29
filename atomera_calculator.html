@@ -954,7 +954,7 @@ function resetAll() {
 init();
 
 // ── 실시간 주가 (Yahoo Finance via allorigins proxy) ──
-const CALC_FALLBACK = { price: 8.60, mktcapM: Math.round(39.4 * 8.60), shares: 39.4 };
+const CALC_FALLBACK = { price: 7.31, mktcapM: Math.round(39.4 * 7.31), shares: 39.4 };
 async function fetchCalcLive() {
   const proxy = 'https://api.allorigins.win/get?url=';
   const url = 'https://query1.finance.yahoo.com/v8/finance/chart/ATOM?interval=1d&range=1d';
