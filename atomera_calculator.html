@@ -999,10 +999,10 @@ async function refreshCalcPrice() {
   if (priceInp) { priceInp.value = d.price.toFixed(2); state.basePrice = d.price; }
   if (sharesInp) { sharesInp.value = d.shares.toFixed(1); state.shares = d.shares; }
   calculate();
-  const src = d.cached ? '●캐시 공유 · ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit',minute:'2-digit'}) : '실시간 · ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit',minute:'2-digit'});
+  const src = '실시간 · ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit',minute:'2-digit'});
   const note = document.getElementById('calcLiveNote');
   if (note) note.textContent = '※ 현재 주가 $' + d.price.toFixed(2) + ' / 시총 $' + d.mktcapM + 'M / 주식수 ' + d.shares.toFixed(1) + 'M주 (' + src + ')';
-  if (btn) { btn.textContent = d.cached ? '●캐시' : '✓ 실시간'; btn.disabled = false; btn.style.color = '#34d399'; }
+  if (btn) { btn.textContent = '✓ 실시간'; btn.disabled = false; btn.style.color = '#34d399'; }
 }
 refreshCalcPrice();
 </script>

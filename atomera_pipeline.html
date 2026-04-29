@@ -1590,7 +1590,7 @@ async function refreshAtomPrice() {
   }
   const ps = '$' + d.price.toFixed(2);
   const ms = '$' + d.mktcapM + 'M';
-  const src = d.cached ? '●캐시 공유 · ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit',minute:'2-digit'}) : '실시간 · ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit',minute:'2-digit'});
+  const src = '실시간 · ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit',minute:'2-digit'});
   if (g('plLivePrice'))  g('plLivePrice').textContent  = ps;
   if (g('plLiveMktcap')) g('plLiveMktcap').textContent = ms;
   if (g('plLive52w'))    g('plLive52w').textContent    = '$' + d.low52.toFixed(2) + ' ~ $' + d.high52.toFixed(2);
@@ -1598,7 +1598,7 @@ async function refreshAtomPrice() {
   const sharesStr = d.shares.toFixed(1) + 'M주';
   if (g('plLiveShares')) g('plLiveShares').textContent = '~' + sharesStr;
   if (g('plLiveFooter')) g('plLiveFooter').textContent = '※ 현재 주가 ' + ps + ' / 시총 ' + ms + ' / 주식수 ' + sharesStr + ' (' + src + ')';
-  if (btn) { btn.textContent = d.cached ? '●캐시' : '✓ 실시간'; btn.disabled = false; btn.style.color = '#34d399'; }
+  if (btn) { btn.textContent = '✓ 실시간'; btn.disabled = false; btn.style.color = '#34d399'; }
 }
 refreshAtomPrice();
 </script>

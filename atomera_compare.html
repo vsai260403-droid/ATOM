@@ -313,38 +313,38 @@ function calcPSR(mktcap, revenue) {
   return mktcap / revenue;
 }
 
-// ── Yahoo Finance fetch (allorigins proxy) ──
-const PROXY = 'https://api.allorigins.win/get?url=';
+// ── Yahoo Finance fetch ──
 const ATOM_CACHE_KEY = 'ATOM_LIVE_CACHE';
 const ATOM_CACHE_TTL = 5 * 60 * 1000;
 function saveAtomCache(d) { try { localStorage.setItem(ATOM_CACHE_KEY, JSON.stringify({...d, ts: Date.now()})); } catch(e) {} }
 function loadAtomCache() { try { const c = JSON.parse(localStorage.getItem(ATOM_CACHE_KEY)); if (c && Date.now() - c.ts < ATOM_CACHE_TTL) return c; } catch(e) {} return null; }
+
 async function proxyFetch(url) {
   const proxies = [
-    r => fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(r), {signal:AbortSignal.timeout(8000)}).then(x=>x.json()).then(j=>j.contents),
-    r => fetch('https://corsproxy.io/?' + encodeURIComponent(r), {signal:AbortSignal.timeout(8000)}).then(x=>x.text()),
+    u => fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(u), {signal:AbortSignal.timeout(7000)}).then(r=>r.json()).then(j=>j.contents),
+    u => fetch('https://corsproxy.io/?' + encodeURIComponent(u), {signal:AbortSignal.timeout(7000)}).then(r=>r.text()),
   ];
   for (const p of proxies) { try { const t = await p(url); if (t) return t; } catch(e) {} }
   return null;
 }
-async function fetchAllMktcaps() {
-  const tickers = COMPANIES.filter(c => c.ticker !== '—').map(c => c.ticker).join(',');
-  const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${tickers}&fields=marketCap,regularMarketPrice,fiftyTwoWeekHigh,fiftyTwoWeekLow`;
+
+// 개별 티커 시총 fetch (v8 chart API - 가장 안정)
+async function fetchOneMktcap(ticker) {
+  if (ticker === '—') return null;
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
   try {
     const text = await proxyFetch(url);
-    const results = JSON.parse(text).quoteResponse.result;
-    const map = {};
-    results.forEach(q => {
-      map[q.symbol] = q.marketCap ? q.marketCap / 1e9 : null;
-      if (q.symbol === 'ATOM' && q.marketCap) {
-        const price = q.regularMarketPrice;
-        const shares = 39.4;
-        saveAtomCache({ price, mktcapM: Math.round(shares * price), shares,
-          high52: q.fiftyTwoWeekHigh, low52: q.fiftyTwoWeekLow });
-      }
-    });
-    return map;
-  } catch(e) { return {}; }
+    if (!text) return null;
+    const m = JSON.parse(text).chart.result[0].meta;
+    const cap = m.marketCap;
+    if (ticker === 'ATOM' && m.regularMarketPrice) {
+      const price = m.regularMarketPrice;
+      const shares = 39.4;
+      saveAtomCache({ price, mktcapM: Math.round(shares * price), shares,
+        high52: m.fiftyTwoWeekHigh, low52: m.fiftyTwoWeekLow });
+    }
+    return cap ? cap / 1e9 : null;
+  } catch(e) { return null; }
 }
 
 // ── 렌더 ──
@@ -445,35 +445,52 @@ function initScaffold() {
 // fetch 전 초기 상태: mktcap=null, psr=null, live=false
 let fetchedData = COMPANIES.map(c => ({ ...c, mktcap: null, psr: null, live: false }));
 
-// ── 단일 종목 재시도 (전체 일괄 재요청) ──
+// ── 단일 종목 재시도 (해당 종목만) ──
 async function retryOne(ticker) {
-  await refreshAll();
+  const btnId = 'btn-' + ticker.replace('—','mpeg');
+  const btn = document.getElementById(btnId);
+  if (btn) { btn.textContent = '...'; btn.disabled = true; }
+  let liveCap = await fetchOneMktcap(ticker);
+  if (liveCap === null && ticker === 'ATOM') {
+    const cached = loadAtomCache();
+    if (cached) liveCap = cached.mktcapM / 1000;
+  }
+  const idx = fetchedData.findIndex(c => c.ticker === ticker);
+  if (idx !== -1 && liveCap !== null) {
+    fetchedData[idx] = { ...fetchedData[idx], mktcap: liveCap, psr: calcPSR(liveCap, fetchedData[idx].revenue), live: true };
+  }
+  renderTable(fetchedData);
+  renderScatter(fetchedData);
+  updateSummary(fetchedData);
+  updateNote(fetchedData);
 }
 
 async function refreshAll() {
-  const btn = document.getElementById('compareRefreshBtn');
-  if (btn) { btn.textContent = '⟳ 로딩 중...'; btn.disabled = true; }
-
-  // 전체 티커 한 번에 fetch (1회 API 호출)
-  const capMap = await fetchAllMktcaps();
-
-  const results = COMPANIES.map(c => {
-    let liveCap = capMap[c.ticker] ?? null;
+  // 순차 fetch (500ms 간격) - 프록시 레이트 리밋 회피
+  const tickers = COMPANIES.filter(c => c.ticker !== '—');
+  for (let i = 0; i < tickers.length; i++) {
+    const c = tickers[i];
+    let liveCap = await fetchOneMktcap(c.ticker);
     if (liveCap === null && c.ticker === 'ATOM') {
       const cached = loadAtomCache();
-      if (cached) { liveCap = cached.mktcapM / 1000; }
+      if (cached) liveCap = cached.mktcapM / 1000;
     }
-    const mktcap = liveCap !== null ? liveCap : null;
-    const psr    = calcPSR(mktcap, c.revenue);
-    return { ...c, mktcap, psr, live: liveCap !== null };
-  });
-
-  fetchedData = results;
-  renderTable(results);
-  renderScatter(results);
-  updateSummary(results);
-  updateNote(results);
-  if (btn) { btn.disabled = false; }
+    const idx = fetchedData.findIndex(x => x.ticker === c.ticker);
+    if (idx !== -1) {
+      fetchedData[idx] = {
+        ...fetchedData[idx],
+        mktcap: liveCap !== null ? liveCap : null,
+        psr: liveCap !== null ? calcPSR(liveCap, c.revenue) : null,
+        live: liveCap !== null
+      };
+    }
+    // 매 fetch 후 즉시 렌더 (성공한 항목 바로 반영)
+    renderTable(fetchedData);
+    if (i < tickers.length - 1) await new Promise(r => setTimeout(r, 500));
+  }
+  renderScatter(fetchedData);
+  updateSummary(fetchedData);
+  updateNote(fetchedData);
 }
 
 function updateSummary(results) {

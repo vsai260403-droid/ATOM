@@ -849,8 +849,8 @@ async function refreshRmPrice() {
   }
   if (g('rmLivePrice'))  g('rmLivePrice').textContent  = '$' + d.price.toFixed(2);
   if (g('rmLiveMktcap')) g('rmLiveMktcap').textContent = '$' + d.mktcapM + 'M';
-  if (g('rmLiveSrc'))    g('rmLiveSrc').textContent    = d.cached ? '●캐시 공유' : new Date().toLocaleDateString('ko-KR', {month:'2-digit',day:'2-digit'}) + ' 실시간';
-  if (btn) { btn.textContent = d.cached ? '●캐시' : '✓'; btn.disabled = false; btn.style.color = '#34d399'; }
+  if (g('rmLiveSrc'))    g('rmLiveSrc').textContent    = '실시간 · ' + new Date().toLocaleDateString('ko-KR', {month:'2-digit',day:'2-digit'});
+  if (btn) { btn.textContent = '✓'; btn.disabled = false; btn.style.color = '#34d399'; }
 }
 refreshRmPrice();
 </script>
