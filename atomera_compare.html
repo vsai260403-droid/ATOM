@@ -485,6 +485,26 @@ async function refreshAll() {
     }
     btn.disabled = false;
   }
+
+  // 실패 항목이 있으면 note 안에도 재시도 버튼 인라인 표시
+  const noteEl = document.getElementById('compareNote');
+  if (noteEl) {
+    const retryInline = noteEl.querySelector('.inline-retry');
+    if (failCount > 0) {
+      if (!retryInline) {
+        const rb = document.createElement('button');
+        rb.className = 'inline-retry';
+        rb.textContent = `⟳ 실패 ${failCount}개 재시도`;
+        rb.onclick = refreshAll;
+        rb.style.cssText = 'margin-left:8px;background:#1e2d45;border:1px solid #f59e0b;color:#f59e0b;padding:2px 10px;border-radius:4px;font-size:11px;cursor:pointer;font-family:inherit;vertical-align:middle';
+        noteEl.appendChild(rb);
+      } else {
+        retryInline.textContent = `⟳ 실패 ${failCount}개 재시도`;
+      }
+    } else if (retryInline) {
+      retryInline.remove();
+    }
+  }
 }
 
 // ── 초기화 ──
