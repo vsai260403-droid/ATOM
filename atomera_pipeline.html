@@ -1539,6 +1539,10 @@
 <script>
 // ── 실시간 주가 (Yahoo Finance via allorigins proxy) ──
 const ATOM_FALLBACK = { price: 7.31, mktcapM: Math.round(39.4*7.31), shares: 39.4, high52: 9.59, low52: 1.89 };
+const ATOM_CACHE_KEY = 'ATOM_LIVE_CACHE';
+const ATOM_CACHE_TTL = 5 * 60 * 1000;
+function saveAtomCache(d) { try { localStorage.setItem(ATOM_CACHE_KEY, JSON.stringify({...d, ts: Date.now()})); } catch(e) {} }
+function loadAtomCache() { try { const c = JSON.parse(localStorage.getItem(ATOM_CACHE_KEY)); if (c && Date.now() - c.ts < ATOM_CACHE_TTL) return c; } catch(e) {} return null; }
 async function fetchAtomLive() {
   const proxy = 'https://api.allorigins.win/get?url=';
   const url = 'https://query1.finance.yahoo.com/v8/finance/chart/ATOM?interval=1d&range=1d';
@@ -1549,13 +1553,17 @@ async function fetchAtomLive() {
     const price = m.regularMarketPrice || m.regularMarketPreviousClose || ATOM_FALLBACK.price;
     const shares = ATOM_FALLBACK.shares;
     const mktcapM = Math.round(shares * price);
-    return {
+    const result = {
       price, mktcapM, shares,
       high52: m.fiftyTwoWeekHigh || ATOM_FALLBACK.high52,
       low52: m.fiftyTwoWeekLow || ATOM_FALLBACK.low52,
       live: true
     };
+    saveAtomCache(result);
+    return result;
   } catch(e) {
+    const cached = loadAtomCache();
+    if (cached) return { ...cached, high52: cached.high52 || ATOM_FALLBACK.high52, low52: cached.low52 || ATOM_FALLBACK.low52, live: true, cached: true };
     return { ...ATOM_FALLBACK, live: false };
   }
 }
@@ -1576,7 +1584,7 @@ async function refreshAtomPrice() {
   }
   const ps = '$' + d.price.toFixed(2);
   const ms = '$' + d.mktcapM + 'M';
-  const src = '실시간 · ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit',minute:'2-digit'});
+  const src = d.cached ? '●캐시 공유 · ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit',minute:'2-digit'}) : '실시간 · ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit',minute:'2-digit'});
   if (g('plLivePrice'))  g('plLivePrice').textContent  = ps;
   if (g('plLiveMktcap')) g('plLiveMktcap').textContent = ms;
   if (g('plLive52w'))    g('plLive52w').textContent    = '$' + d.low52.toFixed(2) + ' ~ $' + d.high52.toFixed(2);
@@ -1584,7 +1592,7 @@ async function refreshAtomPrice() {
   const sharesStr = d.shares.toFixed(1) + 'M주';
   if (g('plLiveShares')) g('plLiveShares').textContent = '~' + sharesStr;
   if (g('plLiveFooter')) g('plLiveFooter').textContent = '※ 현재 주가 ' + ps + ' / 시총 ' + ms + ' / 주식수 ' + sharesStr + ' (' + src + ')';
-  if (btn) { btn.textContent = '✓ 실시간'; btn.disabled = false; btn.style.color = '#34d399'; }
+  if (btn) { btn.textContent = d.cached ? '●캐시' : '✓ 실시간'; btn.disabled = false; btn.style.color = '#34d399'; }
 }
 refreshAtomPrice();
 </script>

@@ -806,6 +806,10 @@
 
 <script>
 const RM_FALLBACK = { price: 7.31, mktcapM: Math.round(39.4*7.31), shares: 39.4 };
+const ATOM_CACHE_KEY = 'ATOM_LIVE_CACHE';
+const ATOM_CACHE_TTL = 5 * 60 * 1000;
+function saveAtomCache(d) { try { localStorage.setItem(ATOM_CACHE_KEY, JSON.stringify({...d, ts: Date.now()})); } catch(e) {} }
+function loadAtomCache() { try { const c = JSON.parse(localStorage.getItem(ATOM_CACHE_KEY)); if (c && Date.now() - c.ts < ATOM_CACHE_TTL) return c; } catch(e) {} return null; }
 async function fetchRmLive() {
   const proxy = 'https://api.allorigins.win/get?url=';
   const url = 'https://query1.finance.yahoo.com/v8/finance/chart/ATOM?interval=1d&range=1d';
@@ -816,8 +820,14 @@ async function fetchRmLive() {
     const price = m.regularMarketPrice || m.regularMarketPreviousClose || RM_FALLBACK.price;
     const shares = RM_FALLBACK.shares;
     const mktcapM = Math.round(shares * price);
-    return { price, mktcapM, shares, live: true };
-  } catch(e) { return { ...RM_FALLBACK, live: false }; }
+    const result = { price, mktcapM, shares, live: true };
+    saveAtomCache(result);
+    return result;
+  } catch(e) {
+    const cached = loadAtomCache();
+    if (cached) return { ...cached, live: true, cached: true };
+    return { ...RM_FALLBACK, live: false };
+  }
 }
 async function refreshRmPrice() {
   const btn = document.getElementById('rmRefreshBtn');
@@ -833,8 +843,8 @@ async function refreshRmPrice() {
   }
   if (g('rmLivePrice'))  g('rmLivePrice').textContent  = '$' + d.price.toFixed(2);
   if (g('rmLiveMktcap')) g('rmLiveMktcap').textContent = '$' + d.mktcapM + 'M';
-  if (g('rmLiveSrc'))    g('rmLiveSrc').textContent    = new Date().toLocaleDateString('ko-KR', {month:'2-digit',day:'2-digit'}) + ' 실시간';
-  if (btn) { btn.textContent = '✓'; btn.disabled = false; btn.style.color = '#34d399'; }
+  if (g('rmLiveSrc'))    g('rmLiveSrc').textContent    = d.cached ? '●캐시 공유' : new Date().toLocaleDateString('ko-KR', {month:'2-digit',day:'2-digit'}) + ' 실시간';
+  if (btn) { btn.textContent = d.cached ? '●캐시' : '✓'; btn.disabled = false; btn.style.color = '#34d399'; }
 }
 refreshRmPrice();
 </script>

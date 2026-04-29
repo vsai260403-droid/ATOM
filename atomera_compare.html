@@ -318,6 +318,10 @@ function calcPSR(mktcap, revenue) {
 
 // ── Yahoo Finance fetch (allorigins proxy) ──
 const PROXY = 'https://api.allorigins.win/get?url=';
+const ATOM_CACHE_KEY = 'ATOM_LIVE_CACHE';
+const ATOM_CACHE_TTL = 5 * 60 * 1000;
+function saveAtomCache(d) { try { localStorage.setItem(ATOM_CACHE_KEY, JSON.stringify({...d, ts: Date.now()})); } catch(e) {} }
+function loadAtomCache() { try { const c = JSON.parse(localStorage.getItem(ATOM_CACHE_KEY)); if (c && Date.now() - c.ts < ATOM_CACHE_TTL) return c; } catch(e) {} return null; }
 async function fetchMktcap(ticker) {
   if (ticker === '—') return null;
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
@@ -326,6 +330,12 @@ async function fetchMktcap(ticker) {
     const j = await r.json();
     const meta = JSON.parse(j.contents).chart.result[0].meta;
     const cap = meta.marketCap;
+    if (ticker === 'ATOM' && cap) {
+      const price = meta.regularMarketPrice || meta.regularMarketPreviousClose;
+      const shares = 39.4;
+      saveAtomCache({ price, mktcapM: Math.round(shares * price), shares,
+        high52: meta.fiftyTwoWeekHigh, low52: meta.fiftyTwoWeekLow });
+    }
     return cap ? cap / 1e9 : null; // → $B
   } catch(e) { return null; }
 }

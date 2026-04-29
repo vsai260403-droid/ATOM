@@ -955,6 +955,10 @@ init();
 
 // ── 실시간 주가 (Yahoo Finance via allorigins proxy) ──
 const CALC_FALLBACK = { price: 7.31, mktcapM: Math.round(39.4 * 7.31), shares: 39.4 };
+const ATOM_CACHE_KEY = 'ATOM_LIVE_CACHE';
+const ATOM_CACHE_TTL = 5 * 60 * 1000;
+function saveAtomCache(d) { try { localStorage.setItem(ATOM_CACHE_KEY, JSON.stringify({...d, ts: Date.now()})); } catch(e) {} }
+function loadAtomCache() { try { const c = JSON.parse(localStorage.getItem(ATOM_CACHE_KEY)); if (c && Date.now() - c.ts < ATOM_CACHE_TTL) return c; } catch(e) {} return null; }
 async function fetchCalcLive() {
   const proxy = 'https://api.allorigins.win/get?url=';
   const url = 'https://query1.finance.yahoo.com/v8/finance/chart/ATOM?interval=1d&range=1d';
@@ -963,11 +967,16 @@ async function fetchCalcLive() {
     const j = await r.json();
     const m = JSON.parse(j.contents).chart.result[0].meta;
     const price = m.regularMarketPrice || m.regularMarketPreviousClose || CALC_FALLBACK.price;
-    const mktcapM = m.marketCap ? Math.round(m.marketCap / 1e6 * 10) / 10 : CALC_FALLBACK.mktcapM;
-    // 주식수 역산: Yahoo marketCap / price (소수점 1자리 M단위)
-    const shares = m.marketCap && price ? Math.round(m.marketCap / price / 1e6 * 10) / 10 : CALC_FALLBACK.shares;
-    return { price, mktcapM, shares, live: true };
-  } catch(e) { return { ...CALC_FALLBACK, live: false }; }
+    const shares = CALC_FALLBACK.shares;
+    const mktcapM = Math.round(shares * price);
+    const result = { price, mktcapM, shares, live: true };
+    saveAtomCache(result);
+    return result;
+  } catch(e) {
+    const cached = loadAtomCache();
+    if (cached) return { ...cached, live: true, cached: true };
+    return { ...CALC_FALLBACK, live: false };
+  }
 }
 async function refreshCalcPrice() {
   const btn = document.getElementById('calcRefreshBtn');
@@ -984,10 +993,10 @@ async function refreshCalcPrice() {
   if (priceInp) { priceInp.value = d.price.toFixed(2); state.basePrice = d.price; }
   if (sharesInp) { sharesInp.value = d.shares.toFixed(1); state.shares = d.shares; }
   calculate();
-  const src = '실시간 · ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit',minute:'2-digit'});
+  const src = d.cached ? '●캐시 공유 · ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit',minute:'2-digit'}) : '실시간 · ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit',minute:'2-digit'});
   const note = document.getElementById('calcLiveNote');
   if (note) note.textContent = '※ 현재 주가 $' + d.price.toFixed(2) + ' / 시총 $' + d.mktcapM + 'M / 주식수 ' + d.shares.toFixed(1) + 'M주 (' + src + ')';
-  if (btn) { btn.textContent = '✓ 실시간'; btn.disabled = false; btn.style.color = '#34d399'; }
+  if (btn) { btn.textContent = d.cached ? '●캐시' : '✓ 실시간'; btn.disabled = false; btn.style.color = '#34d399'; }
 }
 refreshCalcPrice();
 </script>
