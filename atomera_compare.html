@@ -328,22 +328,22 @@ async function proxyFetch(url) {
   return null;
 }
 
-// 개별 티커 시총 fetch (v8 chart API - 가장 안정)
-async function fetchOneMktcap(ticker) {
-  if (ticker === '—') return null;
+// 개별 티커 시총 fetch (v8 chart API - 주가 fetch → 주식수 × 주가 계산)
+async function fetchOneMktcap(ticker, sharesB) {
+  if (ticker === '—' || !sharesB) return null;
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
   try {
     const text = await proxyFetch(url);
     if (!text) return null;
     const m = JSON.parse(text).chart.result[0].meta;
-    const cap = m.marketCap;
-    if (ticker === 'ATOM' && m.regularMarketPrice) {
-      const price = m.regularMarketPrice;
-      const shares = 39.4;
-      saveAtomCache({ price, mktcapM: Math.round(shares * price), shares,
+    const price = m.regularMarketPrice || m.regularMarketPreviousClose;
+    if (!price) return null;
+    const capB = sharesB * price; // $B
+    if (ticker === 'ATOM') {
+      saveAtomCache({ price, mktcapM: Math.round(capB * 1000), shares: sharesB * 1000,
         high52: m.fiftyTwoWeekHigh, low52: m.fiftyTwoWeekLow });
     }
-    return cap ? cap / 1e9 : null;
+    return capB;
   } catch(e) { return null; }
 }
 
@@ -450,12 +450,12 @@ async function retryOne(ticker) {
   const btnId = 'btn-' + ticker.replace('—','mpeg');
   const btn = document.getElementById(btnId);
   if (btn) { btn.textContent = '...'; btn.disabled = true; }
-  let liveCap = await fetchOneMktcap(ticker);
+  const idx = fetchedData.findIndex(c => c.ticker === ticker);
+  let liveCap = await fetchOneMktcap(ticker, idx !== -1 ? fetchedData[idx].sharesB : undefined);
   if (liveCap === null && ticker === 'ATOM') {
     const cached = loadAtomCache();
     if (cached) liveCap = cached.mktcapM / 1000;
   }
-  const idx = fetchedData.findIndex(c => c.ticker === ticker);
   if (idx !== -1 && liveCap !== null) {
     fetchedData[idx] = { ...fetchedData[idx], mktcap: liveCap, psr: calcPSR(liveCap, fetchedData[idx].revenue), live: true };
   }
@@ -470,7 +470,7 @@ async function refreshAll() {
   const tickers = COMPANIES.filter(c => c.ticker !== '—');
   for (let i = 0; i < tickers.length; i++) {
     const c = tickers[i];
-    let liveCap = await fetchOneMktcap(c.ticker);
+    let liveCap = await fetchOneMktcap(c.ticker, c.sharesB);
     if (liveCap === null && c.ticker === 'ATOM') {
       const cached = loadAtomCache();
       if (cached) liveCap = cached.mktcapM / 1000;
