@@ -496,78 +496,57 @@ function applyPreset(key) {
 }
 
 // === Yahoo Finance 데이터 자동 로드 ===
+const YAHOO_URL = 'https://query1.finance.yahoo.com/v8/finance/chart/ATOM?interval=1d&range=1y';
+const CORS_PROXIES = [
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+  url => `https://thingproxy.freeboard.io/fetch/${url}`,
+];
+
 async function fetchYahooData() {
   const fetchBtn = document.getElementById('fetchBtn');
   fetchBtn.textContent = '⏳ 로딩...';
   fetchBtn.disabled = true;
 
+  // 1차: 직접 호출 시도
+  let json = null;
   try {
-    // Yahoo Finance Chart API (1년 일봉)
-    const url = 'https://query1.finance.yahoo.com/v8/finance/chart/ATOM?interval=1d&range=1y';
-    const res = await fetch(url);
+    const res = await fetch(YAHOO_URL);
+    if (res.ok) json = await res.json();
+  } catch(e) { /* CORS 차단 예상 */ }
 
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const json = await res.json();
-    const result = json.chart.result[0];
-    const closes = result.indicators.quote[0].close.filter(v => v != null);
-
-    if (closes.length < 20) throw new Error('데이터 부족');
-
-    // 현재가
-    const currentPrice = closes[closes.length - 1];
-    document.getElementById('currentPrice').value = currentPrice.toFixed(2);
-    document.getElementById('dsPrice').textContent = '$' + currentPrice.toFixed(2);
-
-    // 역사적 변동성 (일간 로그수익률의 표준편차 × √252)
-    const logReturns = [];
-    for (let i = 1; i < closes.length; i++) {
-      if (closes[i] > 0 && closes[i-1] > 0) {
-        logReturns.push(Math.log(closes[i] / closes[i-1]));
-      }
+  // 2차: CORS 프록시 순차 시도
+  if (!json) {
+    for (const makeUrl of CORS_PROXIES) {
+      try {
+        const proxyUrl = makeUrl(YAHOO_URL);
+        const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(8000) });
+        if (res.ok) {
+          const text = await res.text();
+          json = JSON.parse(text);
+          if (json?.chart?.result) break;
+          json = null;
+        }
+      } catch(e) { json = null; }
     }
-    const mean = logReturns.reduce((a, b) => a + b, 0) / logReturns.length;
-    const variance = logReturns.reduce((a, b) => a + (b - mean) ** 2, 0) / (logReturns.length - 1);
-    const dailyVol = Math.sqrt(variance);
-    const annualVol = dailyVol * Math.sqrt(252);
-    const volPct = Math.round(annualVol * 100);
+  }
 
-    document.getElementById('annualVol').value = volPct;
-    document.getElementById('dsVol').textContent = volPct + '%';
-
-    // 실현 수익률 (참고용, 기대수익률에는 파이프라인 분석 유지)
-    const oneYearReturn = ((currentPrice - closes[0]) / closes[0] * 100).toFixed(0);
-    document.getElementById('dsPrice').innerHTML = `$${currentPrice.toFixed(2)} <span style="font-size:9px;color:${oneYearReturn >= 0 ? '#34d399' : '#f87171'};">(1Y: ${oneYearReturn >= 0 ? '+' : ''}${oneYearReturn}%)</span>`;
-
-    fetchBtn.textContent = '✅ 로드 완료';
-    fetchBtn.style.borderColor = '#10b981';
-    fetchBtn.style.color = '#10b981';
-
-    setTimeout(() => {
-      fetchBtn.textContent = '⟳ Yahoo Finance 실시간 로드';
-      fetchBtn.style.borderColor = '';
-      fetchBtn.style.color = '';
-      fetchBtn.disabled = false;
-    }, 3000);
-
-  } catch (err) {
-    console.warn('Yahoo Finance 로드 실패:', err.message);
-    // Fallback: CORS 프록시 시도
+  // 성공 시 파싱
+  if (json?.chart?.result?.[0]) {
     try {
-      const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent('https://query1.finance.yahoo.com/v8/finance/chart/ATOM?interval=1d&range=1y');
-      const res2 = await fetch(proxyUrl);
-      if (!res2.ok) throw new Error('프록시도 실패');
-      const json2 = await res2.json();
-      const result2 = json2.chart.result[0];
-      const closes2 = result2.indicators.quote[0].close.filter(v => v != null);
+      const result = json.chart.result[0];
+      const closes = result.indicators.quote[0].close.filter(v => v != null);
+      if (closes.length < 20) throw new Error('데이터 부족');
 
-      const currentPrice = closes2[closes2.length - 1];
+      const currentPrice = closes[closes.length - 1];
       document.getElementById('currentPrice').value = currentPrice.toFixed(2);
-      document.getElementById('dsPrice').textContent = '$' + currentPrice.toFixed(2);
 
+      // 역사적 변동성 (일간 로그수익률 σ × √252)
       const logReturns = [];
-      for (let i = 1; i < closes2.length; i++) {
-        if (closes2[i] > 0 && closes2[i-1] > 0) {
-          logReturns.push(Math.log(closes2[i] / closes2[i-1]));
+      for (let i = 1; i < closes.length; i++) {
+        if (closes[i] > 0 && closes[i-1] > 0) {
+          logReturns.push(Math.log(closes[i] / closes[i-1]));
         }
       }
       const mean = logReturns.reduce((a, b) => a + b, 0) / logReturns.length;
@@ -576,33 +555,58 @@ async function fetchYahooData() {
       const volPct = Math.round(annualVol * 100);
 
       document.getElementById('annualVol').value = volPct;
-      document.getElementById('dsVol').textContent = volPct + '%';
+      document.getElementById('dsVol').textContent = volPct + '% (실측)';
 
-      fetchBtn.textContent = '✅ 프록시 로드 완료';
+      const oneYearReturn = ((currentPrice - closes[0]) / closes[0] * 100).toFixed(0);
+      document.getElementById('dsPrice').innerHTML = `$${currentPrice.toFixed(2)} <span style="font-size:9px;color:${oneYearReturn >= 0 ? '#34d399' : '#f87171'};">(1Y: ${oneYearReturn >= 0 ? '+' : ''}${oneYearReturn}%)</span>`;
+
+      fetchBtn.textContent = '✅ 로드 완료';
       fetchBtn.style.borderColor = '#10b981';
       fetchBtn.style.color = '#10b981';
-      setTimeout(() => {
-        fetchBtn.textContent = '⟳ Yahoo Finance 실시간 로드';
-        fetchBtn.style.borderColor = '';
-        fetchBtn.style.color = '';
-        fetchBtn.disabled = false;
-      }, 3000);
-
-    } catch (err2) {
-      // 최종 fallback: 기본값 유지
-      document.getElementById('dsPrice').textContent = '$4.20 (기본값)';
-      document.getElementById('dsVol').textContent = '95% (기본값)';
-      fetchBtn.textContent = '❌ CORS 차단 — 기본값 사용';
-      fetchBtn.style.borderColor = '#f87171';
-      fetchBtn.style.color = '#f87171';
-      setTimeout(() => {
-        fetchBtn.textContent = '⟳ Yahoo Finance 실시간 로드';
-        fetchBtn.style.borderColor = '';
-        fetchBtn.style.color = '';
-        fetchBtn.disabled = false;
-      }, 4000);
-    }
+      setTimeout(() => { resetFetchBtn(); }, 3000);
+      return;
+    } catch(e) { /* 파싱 실패 → fallback */ }
   }
+
+  // 최종 실패: 기본값 사용 (ATOM 과거 데이터 기반 하드코딩)
+  // 2025~2026 ATOM 평균 주가 $3.5~$5.5, 변동성 85~110%
+  document.getElementById('dsPrice').textContent = '$4.20 (수동 입력 필요)';
+  document.getElementById('dsVol').textContent = '95% (과거 평균)';
+  fetchBtn.textContent = '⚠️ API 차단 — 아래 설명 참고';
+  fetchBtn.style.borderColor = '#f59e0b';
+  fetchBtn.style.color = '#f59e0b';
+  fetchBtn.disabled = false;
+
+  // 안내 메시지 표시
+  showFetchHelp();
+}
+
+function resetFetchBtn() {
+  const btn = document.getElementById('fetchBtn');
+  btn.textContent = '⟳ Yahoo Finance 새로고침';
+  btn.style.borderColor = '';
+  btn.style.color = '';
+  btn.disabled = false;
+}
+
+function showFetchHelp() {
+  const panel = document.getElementById('dataSourcePanel');
+  if (document.getElementById('fetchHelp')) return;
+  const helpDiv = document.createElement('div');
+  helpDiv.id = 'fetchHelp';
+  helpDiv.style.cssText = 'margin-top:12px; padding:10px 14px; background:#1a1200; border:1px solid #3d3000; border-radius:8px; font-size:11px; line-height:1.8; color:#fbbf24;';
+  helpDiv.innerHTML = `
+    <strong>⚠️ Yahoo Finance API가 CORS 정책으로 차단됨</strong><br>
+    <span style="color:#9ca3af;">로컬 HTML 파일에서는 외부 API 호출이 제한됩니다. 아래 방법으로 해결:</span><br><br>
+    <strong style="color:#e2e8f0;">방법 1: 현재가 직접 입력 (가장 간단)</strong><br>
+    → 위 "현재 주가" 칸에 <a href="https://finance.yahoo.com/quote/ATOM/" target="_blank" style="color:#22d3ee;">Yahoo Finance ATOM 페이지</a>에서 확인한 값을 직접 입력<br>
+    → 변동성은 95%로 이미 ATOM 과거 데이터 기반이라 그대로 사용 OK<br><br>
+    <strong style="color:#e2e8f0;">방법 2: GitHub Pages로 호스팅</strong><br>
+    → GitHub Pages(https)에서 열면 CORS 프록시가 작동하여 자동 로드됨<br><br>
+    <strong style="color:#e2e8f0;">방법 3: Live Server 확장 사용</strong><br>
+    → VS Code "Live Server" 확장으로 localhost에서 열면 프록시 성공률 높아짐
+  `;
+  panel.appendChild(helpDiv);
 }
 
 // 페이지 로드 시 자동으로 Yahoo Finance 데이터 시도
