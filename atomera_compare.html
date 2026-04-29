@@ -278,194 +278,193 @@
     </div>
   </div>
 
-  <div class="note">
-    ※ 시가총액·매출은 2026년 4월 기준 공개 데이터 (Yahoo Finance, Bloomberg)<br>
-    ※ Atomera PSR은 24년 연매출 $0.8M 기준 추정치 (상업매출 본격화 전)<br>
-    ※ PSR = Price-to-Sales Ratio (주가 / 매출 배수)
+  <div class="note" id="compareNote">
+    ※ 시가총액 실시간 로딩 중... (Yahoo Finance)<br>
+    ※ 연매출은 최근 분기 공개 데이터 기준 (분기 1회 업데이트)<br>
+    ※ PSR = 실시간 시가총액 ÷ 연매출 (TTM)
+  </div>
+  <div style="text-align:center;margin-top:8px">
+    <button id="compareRefreshBtn" onclick="refreshAll()" style="background:#1e2d45;border:1px solid #334155;color:#94a3b8;padding:6px 16px;border-radius:6px;font-size:12px;cursor:pointer;font-family:'DM Mono',monospace">⟳ 실시간 시총 새로고침</button>
   </div>
 
 <script>
+// ── 기업 데이터 (revenue = TTM 연매출 $B, mktcap = 폴백값 $B) ──
 const COMPANIES = [
-  {
-    name: 'Atomera', ticker: 'ATOM', type: 'atom',
-    typeLabel: '반도체 IP (MST®)',
-    mktcap: 0.295, revenue: 0.0008, psr: 3,
-    note: '상업매출 초기 단계',
-    color: '#6ee7b7'
-  },
-  {
-    name: 'ARM Holdings', ticker: 'ARM', type: 'ip',
-    typeLabel: '반도체 IP 라이선싱',
-    mktcap: 145, revenue: 3.9, psr: 37,
-    note: '전세계 모바일 CPU IP',
-    color: '#a78bfa'
-  },
-  {
-    name: 'Rambus', ticker: 'RMBS', type: 'ip',
-    typeLabel: '메모리 인터페이스 IP',
-    mktcap: 4.2, revenue: 0.42, psr: 10,
-    note: 'DRAM 인터페이스 IP · 가장 유사',
-    color: '#60a5fa'
-  },
-  {
-    name: 'Synopsys', ticker: 'SNPS', type: 'eda',
-    typeLabel: 'EDA 소프트웨어',
-    mktcap: 58, revenue: 6.1, psr: 9.5,
-    note: 'Atomera MSTcad 파트너',
-    color: '#34d399'
-  },
-  {
-    name: 'Cadence Design', ticker: 'CDNS', type: 'eda',
-    typeLabel: 'EDA 소프트웨어',
-    mktcap: 62, revenue: 4.6, psr: 13,
-    note: 'EDA 2위',
-    color: '#34d399'
-  },
-  {
-    name: 'MPEG LA (비상장)', ticker: '—', type: 'ip',
-    typeLabel: '특허 라이선싱 풀',
-    mktcap: null, revenue: 0.5, psr: null,
-    note: 'IP 라이선싱 유사 모델',
-    color: '#6b7280'
-  },
-  {
-    name: 'Qualcomm', ticker: 'QCOM', type: 'semi',
-    typeLabel: '팹리스 + IP 라이선싱',
-    mktcap: 165, revenue: 39, psr: 4.2,
-    note: '라이선싱 사업부 별도 고PSR',
-    color: '#f59e0b'
-  },
-  {
-    name: 'CEVA', ticker: 'CEVA', type: 'ip',
-    typeLabel: 'DSP IP 라이선싱',
-    mktcap: 0.59, revenue: 0.098, psr: 6,
-    note: '소규모 IP 라이선싱',
-    color: '#818cf8'
-  },
-  {
-    name: 'Lattice Semi', ticker: 'LSCC', type: 'semi',
-    typeLabel: 'FPGA 반도체',
-    mktcap: 5.8, revenue: 0.51, psr: 11,
-    note: '소형 반도체 고PSR 사례',
-    color: '#f59e0b'
-  },
-  {
-    name: 'Impinj', ticker: 'PI', type: 'semi',
-    typeLabel: 'RFID IC',
-    mktcap: 4.1, revenue: 0.32, psr: 13,
-    note: '틈새시장 고PSR 반도체',
-    color: '#f59e0b'
-  },
+  { name:'Atomera',       ticker:'ATOM', type:'atom', typeLabel:'반도체 IP (MST®)',         revenue:0.0008, mktcap:0.295,  note:'상업매출 초기 단계',           color:'#6ee7b7' },
+  { name:'ARM Holdings',  ticker:'ARM',  type:'ip',   typeLabel:'반도체 IP 라이선싱',        revenue:3.9,    mktcap:145,    note:'전세계 모바일 CPU IP',         color:'#a78bfa' },
+  { name:'Rambus',        ticker:'RMBS', type:'ip',   typeLabel:'메모리 인터페이스 IP',      revenue:0.42,   mktcap:4.2,    note:'DRAM 인터페이스 IP · 가장 유사', color:'#60a5fa' },
+  { name:'Synopsys',      ticker:'SNPS', type:'eda',  typeLabel:'EDA 소프트웨어',            revenue:6.1,    mktcap:58,     note:'Atomera MSTcad 파트너',       color:'#34d399' },
+  { name:'Cadence Design',ticker:'CDNS', type:'eda',  typeLabel:'EDA 소프트웨어',            revenue:4.6,    mktcap:62,     note:'EDA 2위',                     color:'#34d399' },
+  { name:'Qualcomm',      ticker:'QCOM', type:'semi', typeLabel:'팹리스 + IP 라이선싱',      revenue:39,     mktcap:165,    note:'라이선싱 사업부 별도 고PSR',   color:'#f59e0b' },
+  { name:'CEVA',          ticker:'CEVA', type:'ip',   typeLabel:'DSP IP 라이선싱',           revenue:0.098,  mktcap:0.59,   note:'소규모 IP 라이선싱',           color:'#818cf8' },
+  { name:'Lattice Semi',  ticker:'LSCC', type:'semi', typeLabel:'FPGA 반도체',               revenue:0.51,   mktcap:5.8,    note:'소형 반도체 고PSR 사례',       color:'#f59e0b' },
+  { name:'Impinj',        ticker:'PI',   type:'semi', typeLabel:'RFID IC',                   revenue:0.32,   mktcap:4.1,    note:'틈새시장 고PSR 반도체',        color:'#f59e0b' },
+  { name:'MPEG LA',       ticker:'—',    type:'ip',   typeLabel:'특허 라이선싱 풀',           revenue:0.5,    mktcap:null,   note:'IP 라이선싱 유사 모델 (비상장)',color:'#6b7280' },
 ];
 
-function fmt(v, decimals=1) {
-  if (v === null) return '—';
+// ── 유틸 ──
+function fmt(v, d=1) {
+  if (v === null || v === undefined) return '—';
   if (v >= 1000) return '$' + (v/1000).toFixed(1) + 'T';
-  if (v >= 1) return '$' + v.toFixed(decimals) + 'B';
-  if (v >= 0.001) return '$' + (v*1000).toFixed(0) + 'M';
-  return '$' + (v*1000000).toFixed(0) + 'K';
+  if (v >= 1)    return '$' + v.toFixed(d) + 'B';
+  if (v >= 0.001)return '$' + (v*1000).toFixed(0) + 'M';
+  return '$' + (v*1e6).toFixed(0) + 'K';
+}
+function tagClass(t) { return t==='atom'?'tag-atom':t==='ip'?'tag-ip':t==='eda'?'tag-design':'tag-semi'; }
+function calcPSR(mktcap, revenue) {
+  if (!mktcap || !revenue || revenue <= 0) return null;
+  return mktcap / revenue;
 }
 
-function tagClass(type) {
-  return type === 'atom' ? 'tag-atom' : type === 'ip' ? 'tag-ip' : type === 'eda' ? 'tag-design' : 'tag-semi';
+// ── Yahoo Finance fetch (allorigins proxy) ──
+const PROXY = 'https://api.allorigins.win/get?url=';
+async function fetchMktcap(ticker) {
+  if (ticker === '—') return null;
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
+  try {
+    const r = await fetch(PROXY + encodeURIComponent(url), { signal: AbortSignal.timeout(8000) });
+    const j = await r.json();
+    const meta = JSON.parse(j.contents).chart.result[0].meta;
+    const cap = meta.marketCap;
+    return cap ? cap / 1e9 : null; // → $B
+  } catch(e) { return null; }
 }
 
-const maxPSR = 40;
-const atomPSR = 3;
+// ── 렌더 ──
+const maxPSRScale = 45;
 
-// 테이블 렌더
-const tbody = document.getElementById('tableBody');
-COMPANIES.forEach(c => {
-  const psr = c.psr !== null ? c.psr.toFixed(1) + 'x' : '—';
-  const barPct = c.psr !== null ? Math.min(c.psr / maxPSR * 100, 100) : 0;
-  const ratio = c.psr !== null && c.name !== 'Atomera' ? (c.psr / atomPSR).toFixed(1) + 'x ↑' : '—';
-  const highlight = c.name === 'Rambus' || c.name === 'Atomera' ? 'highlight' : '';
-
-  tbody.innerHTML += `
-    <tr class="${highlight}">
-      <td>
-        <div class="company-name">${c.name}</div>
-        <div class="company-ticker">${c.ticker}</div>
-        <div class="company-type"><span class="tag ${tagClass(c.type)}">${c.typeLabel}</span></div>
-      </td>
-      <td style="font-size:11px;color:var(--muted);max-width:160px">${c.note}</td>
-      <td class="num">${fmt(c.mktcap)}</td>
-      <td class="num">${fmt(c.revenue)}</td>
-      <td class="num" style="font-weight:700;color:${c.psr > 20 ? 'var(--purple)' : c.psr > 8 ? 'var(--yellow)' : 'var(--muted)'}">${psr}</td>
-      <td class="psr-bar-cell">
-        <div class="psr-bar-bg"><div class="psr-bar-fill" style="width:${barPct}%;background:${c.color}"></div></div>
-      </td>
-      <td class="num"><span class="upside ${c.psr > atomPSR ? 'up' : 'na'}">${ratio}</span></td>
-    </tr>
-  `;
-});
-
-// 산포도 렌더
-const area = document.getElementById('scatterArea');
-const W = area.offsetWidth || 600;
-const H = 260;
-
-// 그리드라인
-[25, 50, 75].forEach(pct => {
-  const g = document.createElement('div');
-  g.className = 'scatter-gridline-v';
-  g.style.left = pct + '%';
-  area.appendChild(g);
-});
-[25, 50, 75].forEach(pct => {
-  const g = document.createElement('div');
-  g.className = 'scatter-gridline-h';
-  g.style.bottom = pct + '%';
-  area.appendChild(g);
-});
-
-// 축 눈금
-const xLabels = ['소형', '중형', '대형', '초대형'];
-xLabels.forEach((l, i) => {
-  const tick = document.createElement('div');
-  tick.className = 'scatter-tick-x';
-  tick.style.left = (25 * (i+1)) + '%';
-  tick.textContent = l;
-  area.appendChild(tick);
-});
-const yLabels = ['10x', '20x', '30x'];
-yLabels.forEach((l, i) => {
-  const tick = document.createElement('div');
-  tick.className = 'scatter-tick-y';
-  tick.style.bottom = (25 * (i+1)) + '%';
-  tick.textContent = l;
-  area.appendChild(tick);
-});
-
-// 매출 기준 x축 (log scale 근사)
-function xPos(rev) {
-  if (rev <= 0) return 2;
-  const mn = Math.log10(0.0008), mx = Math.log10(40);
-  return Math.max(2, Math.min(96, (Math.log10(rev) - mn) / (mx - mn) * 96));
-}
-function yPos(psr) {
-  if (psr === null) return null;
-  return Math.max(2, Math.min(96, psr / 40 * 96));
+function renderTable(data) {
+  const atomPSR = data.find(c => c.ticker === 'ATOM')?.psr || 3;
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+  data.forEach(c => {
+    const psrTxt  = c.psr !== null ? c.psr.toFixed(1) + 'x' : '—';
+    const barPct  = c.psr !== null ? Math.min(c.psr / maxPSRScale * 100, 100) : 0;
+    const ratio   = c.psr !== null && c.ticker !== 'ATOM'
+                    ? (c.psr / atomPSR).toFixed(1) + 'x ↑' : '—';
+    const hl      = (c.ticker === 'RMBS' || c.ticker === 'ATOM') ? 'highlight' : '';
+    const psrColor= c.psr > 20 ? 'var(--purple)' : c.psr > 8 ? 'var(--yellow)' : 'var(--muted)';
+    const liveTag = c.live ? '<span style="font-size:9px;color:#34d399;margin-left:4px">●LIVE</span>'
+                           : '<span style="font-size:9px;color:#64748b;margin-left:4px">○기준</span>';
+    tbody.innerHTML += `
+      <tr class="${hl}">
+        <td>
+          <div class="company-name">${c.name}</div>
+          <div class="company-ticker">${c.ticker}${liveTag}</div>
+          <div class="company-type"><span class="tag ${tagClass(c.type)}">${c.typeLabel}</span></div>
+        </td>
+        <td style="font-size:11px;color:var(--muted);max-width:160px">${c.note}</td>
+        <td class="num">${fmt(c.mktcap)}</td>
+        <td class="num">${fmt(c.revenue)}</td>
+        <td class="num" style="font-weight:700;color:${psrColor}">${psrTxt}</td>
+        <td class="psr-bar-cell">
+          <div class="psr-bar-bg"><div class="psr-bar-fill" style="width:${barPct}%;background:${c.color}"></div></div>
+        </td>
+        <td class="num"><span class="upside ${c.psr > atomPSR ? 'up' : 'na'}">${ratio}</span></td>
+      </tr>`;
+  });
 }
 
-COMPANIES.forEach(c => {
-  if (c.psr === null) return;
-  const x = xPos(c.revenue);
-  const y = yPos(c.psr);
-  const size = c.mktcap ? Math.max(8, Math.min(22, Math.log10(c.mktcap + 0.1) * 8 + 6)) : 8;
+function renderScatter(data) {
+  const area = document.getElementById('scatterArea');
+  // 기존 dot/label 만 제거 (그리드라인·눈금은 유지)
+  area.querySelectorAll('.scatter-dot,.scatter-label').forEach(el => el.remove());
 
-  const dot = document.createElement('div');
-  dot.className = 'scatter-dot';
-  dot.style.cssText = `left:${x}%;bottom:${y}%;width:${size}px;height:${size}px;background:${c.color};`;
-  dot.title = `${c.name}\nPSR: ${c.psr}x\n매출: ${fmt(c.revenue)}\n시총: ${fmt(c.mktcap)}`;
-  area.appendChild(dot);
+  function xPos(rev) {
+    if (!rev || rev <= 0) return 2;
+    const mn = Math.log10(0.0008), mx = Math.log10(40);
+    return Math.max(2, Math.min(96, (Math.log10(rev) - mn) / (mx - mn) * 96));
+  }
+  function yPos(psr) {
+    if (psr === null) return null;
+    return Math.max(2, Math.min(96, psr / maxPSRScale * 96));
+  }
 
-  const lbl = document.createElement('div');
-  lbl.className = 'scatter-label';
-  lbl.style.cssText = `left:${x}%;bottom:${y}%;`;
-  lbl.textContent = c.ticker === '—' ? c.name.split(' ')[0] : c.ticker;
-  area.appendChild(lbl);
-});
+  data.forEach(c => {
+    if (c.psr === null) return;
+    const x    = xPos(c.revenue);
+    const y    = yPos(c.psr);
+    const size = c.mktcap ? Math.max(8, Math.min(22, Math.log10(c.mktcap + 0.1) * 8 + 6)) : 8;
+
+    const dot = document.createElement('div');
+    dot.className = 'scatter-dot';
+    dot.style.cssText = `left:${x}%;bottom:${y}%;width:${size}px;height:${size}px;background:${c.color};`;
+    dot.title = `${c.name}\nPSR: ${c.psr.toFixed(1)}x\n매출: ${fmt(c.revenue)}\n시총: ${fmt(c.mktcap)}${c.live?' (LIVE)':' (기준값)'}`;
+    area.appendChild(dot);
+
+    const lbl = document.createElement('div');
+    lbl.className = 'scatter-label';
+    lbl.style.cssText = `left:${x}%;bottom:${y}%;`;
+    lbl.textContent = c.ticker === '—' ? c.name.split(' ')[0] : c.ticker;
+    area.appendChild(lbl);
+  });
+}
+
+function initScaffold() {
+  const area = document.getElementById('scatterArea');
+  [25,50,75].forEach(p => {
+    const g = document.createElement('div'); g.className='scatter-gridline-v'; g.style.left=p+'%'; area.appendChild(g);
+  });
+  [25,50,75].forEach(p => {
+    const g = document.createElement('div'); g.className='scatter-gridline-h'; g.style.bottom=p+'%'; area.appendChild(g);
+  });
+  ['소형','중형','대형','초대형'].forEach((l,i)=>{
+    const t=document.createElement('div'); t.className='scatter-tick-x'; t.style.left=(25*(i+1))+'%'; t.textContent=l; area.appendChild(t);
+  });
+  ['10x','20x','30x','40x'].forEach((l,i)=>{
+    const t=document.createElement('div'); t.className='scatter-tick-y'; t.style.bottom=(25*(i+1))+'%'; t.textContent=l; area.appendChild(t);
+  });
+}
+
+// ── 실시간 fetch + 렌더 ──
+let fetchedData = COMPANIES.map(c => ({ ...c, psr: calcPSR(c.mktcap, c.revenue), live: false }));
+
+async function refreshAll() {
+  const btn = document.getElementById('compareRefreshBtn');
+  if (btn) { btn.textContent = '⟳ 로딩 중...'; btn.disabled = true; }
+
+  // 모든 티커 병렬 fetch
+  const results = await Promise.all(
+    COMPANIES.map(async c => {
+      const liveCap = await fetchMktcap(c.ticker);
+      const mktcap  = liveCap !== null ? liveCap : c.mktcap;
+      const psr     = calcPSR(mktcap, c.revenue);
+      return { ...c, mktcap, psr, live: liveCap !== null };
+    })
+  );
+
+  fetchedData = results;
+  renderTable(results);
+  renderScatter(results);
+
+  // 요약 카드 — Atomera PSR 업데이트
+  const atom = results.find(c => c.ticker === 'ATOM');
+  if (atom && atom.psr !== null) {
+    document.querySelector('.sum-card:nth-child(1) .sum-value').textContent = '~' + atom.psr.toFixed(0) + 'x';
+    document.querySelector('.sum-card:nth-child(1) .sum-sub').textContent =
+      '시총 ' + fmt(atom.mktcap) + ' / 매출 ' + fmt(atom.revenue);
+  }
+
+  const liveCount = results.filter(c => c.live).length;
+  const total     = results.filter(c => c.ticker !== '—').length;
+  const ts        = new Date().toLocaleTimeString('ko-KR', { hour:'2-digit', minute:'2-digit' });
+  document.getElementById('compareNote').innerHTML =
+    `※ 시가총액 실시간 반영 ${liveCount}/${total}개 · ${ts} 기준 (Yahoo Finance)<br>
+     ※ ●LIVE = 실시간 시총 · ○기준 = 폴백 데이터<br>
+     ※ 연매출은 최근 분기 공개 데이터 기준 · PSR = 실시간 시총 ÷ 연매출`;
+
+  if (btn) {
+    btn.textContent = liveCount === total ? `✓ ${liveCount}/${total} LIVE` : `⚠ ${liveCount}/${total} LIVE`;
+    btn.style.color  = liveCount >= total * 0.7 ? '#34d399' : '#f59e0b';
+    btn.disabled = false;
+  }
+}
+
+// ── 초기화 ──
+initScaffold();
+renderTable(fetchedData);   // 폴백값으로 즉시 렌더
+renderScatter(fetchedData);
+refreshAll();               // 비동기 실시간 업데이트
 </script>
 </body>
 </html>
