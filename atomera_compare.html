@@ -321,17 +321,17 @@ function saveAtomCache(d) { try { localStorage.setItem(ATOM_CACHE_KEY, JSON.stri
 function loadAtomCache() { try { const c = JSON.parse(localStorage.getItem(ATOM_CACHE_KEY)); if (c && Date.now() - c.ts < ATOM_CACHE_TTL) return c; } catch(e) {} return null; }
 async function fetchMktcap(ticker) {
   if (ticker === '—') return null;
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
+  const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${ticker}&fields=marketCap,regularMarketPrice,fiftyTwoWeekHigh,fiftyTwoWeekLow`;
   try {
     const r = await fetch(PROXY + encodeURIComponent(url), { signal: AbortSignal.timeout(8000) });
     const j = await r.json();
-    const meta = JSON.parse(j.contents).chart.result[0].meta;
-    const cap = meta.marketCap;
+    const q = JSON.parse(j.contents).quoteResponse.result[0];
+    const cap = q?.marketCap;
     if (ticker === 'ATOM' && cap) {
-      const price = meta.regularMarketPrice || meta.regularMarketPreviousClose;
+      const price = q.regularMarketPrice;
       const shares = 39.4;
       saveAtomCache({ price, mktcapM: Math.round(shares * price), shares,
-        high52: meta.fiftyTwoWeekHigh, low52: meta.fiftyTwoWeekLow });
+        high52: q.fiftyTwoWeekHigh, low52: q.fiftyTwoWeekLow });
     }
     return cap ? cap / 1e9 : null; // → $B
   } catch(e) { return null; }
