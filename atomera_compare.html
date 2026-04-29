@@ -290,7 +290,7 @@
 <script>
 // ── 기업 데이터 (revenue = TTM 연매출 $B, mktcap = 폴백값 $B) ──
 const COMPANIES = [
-  { name:'Atomera',       ticker:'ATOM', type:'atom', typeLabel:'반도체 IP (MST®)',         revenue:0.0008, mktcap:0.339,  note:'상업매출 초기 단계',           color:'#6ee7b7' },
+  { name:'Atomera',       ticker:'ATOM', type:'atom', typeLabel:'반도체 IP (MST®)',         revenue:0.0008, mktcap:0.288,  note:'상업매출 초기 단계',           color:'#6ee7b7' },
   { name:'ARM Holdings',  ticker:'ARM',  type:'ip',   typeLabel:'반도체 IP 라이선싱',        revenue:3.9,    mktcap:145,    note:'전세계 모바일 CPU IP',         color:'#a78bfa' },
   { name:'Rambus',        ticker:'RMBS', type:'ip',   typeLabel:'메모리 인터페이스 IP',      revenue:0.42,   mktcap:4.2,    note:'DRAM 인터페이스 IP · 가장 유사', color:'#60a5fa' },
   { name:'Synopsys',      ticker:'SNPS', type:'eda',  typeLabel:'EDA 소프트웨어',            revenue:6.1,    mktcap:58,     note:'Atomera MSTcad 파트너',       color:'#34d399' },
@@ -355,7 +355,7 @@ function renderTable(data) {
     const hl      = (c.ticker === 'RMBS' || c.ticker === 'ATOM') ? 'highlight' : '';
     const psrColor= c.psr > 20 ? 'var(--purple)' : c.psr > 8 ? 'var(--yellow)' : 'var(--muted)';
     const liveTag = c.live ? '<span style="font-size:9px;color:#34d399;margin-left:4px">●LIVE</span>'
-                           : '<span style="font-size:9px;color:#64748b;margin-left:4px">○기준</span>';
+                           : '<span style="font-size:9px;color:#64748b;margin-left:4px">○폴백</span>';
     tbody.innerHTML += `
       <tr class="${hl}">
         <td>
@@ -436,7 +436,12 @@ async function refreshAll() {
   // 모든 티커 병렬 fetch
   const results = await Promise.all(
     COMPANIES.map(async c => {
-      const liveCap = await fetchMktcap(c.ticker);
+      let liveCap = await fetchMktcap(c.ticker);
+      // ATOM fetch 실패 시 localStorage 캐시 활용
+      if (liveCap === null && c.ticker === 'ATOM') {
+        const cached = loadAtomCache();
+        if (cached) { liveCap = cached.mktcapM / 1000; }
+      }
       const mktcap  = liveCap !== null ? liveCap : c.mktcap;
       const psr     = calcPSR(mktcap, c.revenue);
       return { ...c, mktcap, psr, live: liveCap !== null };
