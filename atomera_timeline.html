@@ -337,6 +337,12 @@
   .card.negative:hover { border-color: var(--warn); box-shadow: 0 0 25px rgba(255,107,53,0.3); }
   .node.negative { color: var(--warn); border-color: var(--warn); box-shadow: 0 0 12px rgba(255,107,53,0.5); }
 
+  /* catalyst - 레드/핑크 */
+  .card.catalyst { border-color: rgba(248,113,113,0.3); }
+  .card.catalyst::before { background: #f87171; }
+  .card.catalyst:hover { border-color: #f87171; box-shadow: 0 0 25px rgba(248,113,113,0.25); }
+  .node.catalyst { color: #f87171; border-color: #f87171; box-shadow: 0 0 12px rgba(248,113,113,0.5); }
+
   /* special - 다이아몬드 모양 */
   .node.special {
     border-radius: 0;
@@ -1099,21 +1105,113 @@
       <div class="connector"><div class="node milestone"></div></div>
       <div class="card milestone">
         <div class="card-date">2026년 4월 21일</div>
-        <div class="card-title">화합물 반도체 국제 학회 (벨기에) — GaN 결과 발표 예정</div>
+        <div class="card-title">화합물 반도체 국제 학회 (벨기에) — GaN RF 기생채널 데이터 공개</div>
         <div class="card-desc">
-          벨기에에서 열리는 화합물 반도체 국제 학회 참가.
-          MST가 GaN 성장 품질을 향상시키고 전기적 특성을 개선하는 데이터를 공개 발표.
-          <strong>Infineon 추정 첫 상업 GaN 고객</strong> 데이터 본격화 기대.
+          벨기에 화합물 반도체 국제 학회 참가.
+          MST GaN 성장 품질 향상·전기적 특성 개선 데이터 공개.
+          이 발표가 <strong>GaN RF 기생채널 해결 데이터</strong>의 시작점이 됨.
         </div>
-        <div class="tags"><span class="tag milestone">CONFERENCE</span><span class="tag tech">GaN</span></div>
+        <div class="tags"><span class="tag milestone">CONFERENCE</span><span class="tag tech">GaN RF</span></div>
+      </div>
+    </div>
+
+    <div class="event left">
+      <div class="card tech">
+        <div class="card-date">2026년 5월 5일</div>
+        <div class="card-title">🚨 GaN RF 기생채널 해결 — "20년 만에 최고 시트전하 데이터" 발표</div>
+        <div class="card-desc">
+          대형 화합물 반도체 컨퍼런스에서 MST 계면 엔지니어링이 실리콘 기반 GaN의 <strong>기생채널(Parasitic Channel)을 대폭 감소</strong>시킨다는 예비 데이터 공개.
+          20년간 업계가 해결 못 한 난제 해결 시사.
+          업계 베테랑 평가: <em>"지난 20년 동안 본 것 중 가장 뛰어난 시트전하 데이터"</em>.
+          RF GaN 시장(무선 인프라·방산·위성·6G) 직접 타깃.
+          200mm/300mm 양쪽 웨이퍼 규격으로 협업 중.
+          검증 파트너: Incize·Synopsys·UT오스틴·Sandia.
+        </div>
+        <div class="tags"><span class="tag stock">BREAKTHROUGH</span><span class="tag tech">GaN RF</span><span class="tag tech">기생채널</span><span class="tag milestone">20년 난제</span></div>
+      </div>
+      <div class="connector"><div class="node tech"></div></div>
+      <div class="spacer"></div>
+    </div>
+
+    <div class="event right">
+      <div class="spacer"></div>
+      <div class="connector"><div class="node stock"></div></div>
+      <div class="card stock">
+        <div class="card-date">2026년 5월 6일 (장 마감 후)</div>
+        <div class="card-title">1Q26 실적발표 컨콜 — GAA 2사 고객 구조 데모 진행 공식 확인</div>
+        <div class="card-desc">
+          <strong>재무:</strong> GAAP 순손실 $6.1M($0.17/주), 비GAAP $4.9M($0.14/주). GAAP 영업비용 $6.2M(전년 $5.5M).<br><br>
+          <strong>GAA:</strong> TSMC·삼성·인텔·라피더스 4사 중 <strong>2사와 고객 구조 기반 데모 적극 진행 중</strong>. 전기적 결과까지 CEO 직접 언급 ~6개월(2026 Q4 예상).<br><br>
+          <strong>GaN RF:</strong> 기생채널 해결 예비 데이터 확보. CEO: <em>"초기 데이터만으로도 채택 결정할 수 있을 만큼 혁신적"</em>.<br><br>
+          <strong>STMicro:</strong> CEO "가까운 시일 내 협업 재개 확신". SOI 실리콘 결과 기반.<br><br>
+          <strong>AMAT:</strong> 주간 엔지니어링 미팅 + 고객용 공동 마케팅 자료 개발 중.<br><br>
+          <strong>Synopsys:</strong> 협업을 GaN 워크플로우로 확장.<br><br>
+          <strong>DRAM/HBM:</strong> 메모리 제조사들과 논의 중, 로직 고객 대비 초기 단계.<br><br>
+          CEO 원문: <em>"아직 5월에 불과하고, 매달 딜 체결을 희망합니다. 가능성이 매우 높다고 봅니다"</em> — GAA보다 GaN·SOI 부문 염두에 둔 발언.
+        </div>
+        <div class="tags"><span class="tag stock">1Q26 컨콜</span><span class="tag tech">GAA</span><span class="tag tech">GaN RF</span><span class="tag milestone">STMicro</span></div>
       </div>
     </div>
 
   </div><!-- /.timeline -->
 
+  <!-- Q3/Q4 future -->
+  <div class="timeline">
+    <div class="year-divider"><div class="year-label">2026 — Q3 (예상)</div></div>
+
+    <div class="event left">
+      <div class="card catalyst" style="border-color:#22d3ee44;background:linear-gradient(135deg,#0a1a1a,#0f0f1a)">
+        <div class="card-date">2026년 Q3 (예상)</div>
+        <div class="card-title">⚡ GaN RF 기생채널 검증 완료 예상</div>
+        <div class="card-desc">
+          Incize·Sandia·UT오스틴 등 파트너와 예비 데이터 공식 검증 완료 예상 시점.
+          확정 시 무선인프라·방산·6G·위성 고객과 계약 협의 착수 가능.
+          CEO: <em>"초기 데이터만으로도 채택 결정할 수 있을 만큼 혁신적"</em> — 전력용 GaN보다 더 빠른 상업화 경로 가능성.
+        </div>
+        <div class="tags"><span class="tag tech">GaN RF</span><span class="tag milestone">검증</span><span class="tag stock">⚡ 예상 카탈리스트</span></div>
+      </div>
+      <div class="connector"><div class="node milestone"></div></div>
+      <div class="spacer"></div>
+    </div>
+
+    <div class="event right">
+      <div class="spacer"></div>
+      <div class="connector"><div class="node milestone"></div></div>
+      <div class="card catalyst" style="border-color:#f59e0b44;background:linear-gradient(135deg,#1a0e00,#0f0f1a)">
+        <div class="card-date">2026년 8월 (인사이더 예상)</div>
+        <div class="card-title">🔒 삼성 선행소자 테스트 결과</div>
+        <div class="card-desc">
+          GAA가 아닌 다른 구조의 선행소자에 MST 적용 테스트 결과 공개 예상 시점.
+          긍정 결과 → 채택 협의 → 2032년 양산 시나리오.
+          투자 가치: 직접 매출보다 <strong>인텔·TSMC 설득 증거</strong>로서의 의미.
+        </div>
+        <div class="tags"><span class="tag stock">🔒 인사이더</span><span class="tag">삼성 선행소자</span></div>
+      </div>
+    </div>
+
+    <div class="year-divider"><div class="year-label">2026 — Q4 (예상)</div></div>
+
+    <div class="event left">
+      <div class="card stock" style="border-color:#f8717144">
+        <div class="card-date">2026년 Q4 (CEO 타임라인)</div>
+        <div class="card-title">🔥 GAA 2사 고객 구조 전기적 결과 — 2026년 최대 바이너리 이벤트</div>
+        <div class="card-desc">
+          CEO Q1 컨콜 직접 언급: <em>"전기적 결과 나오기까지 약 6개월"</em>.
+          고객 웨이퍼 수령 → 2~3개월 MST 증착 → 고객 팹 공정 수개월 → 전기적 결과.
+          <strong>긍정 결과 시:</strong> TEM 구조 확인 → JDA 협상 착수.
+          <strong>부정 결과 시:</strong> 파라미터 조정 후 재시도 (수 개월 추가 소요).
+          이 결과가 Atomera의 GAA 상업화 가능 여부를 결정짓는 가장 중요한 데이터포인트.
+        </div>
+        <div class="tags"><span class="tag stock">🔥 최대 카탈리스트</span><span class="tag tech">GAA 2사</span><span class="tag milestone">바이너리 이벤트</span></div>
+      </div>
+      <div class="connector"><div class="node stock"></div></div>
+      <div class="spacer"></div>
+    </div>
+  </div>
+
   <!-- ── 종합 스탯 ── -->
   <div class="stats-section">
-    <div class="stats-title">▸ KEY METRICS · 2026.04 기준 ◂</div>
+    <div class="stats-title">▸ KEY METRICS · 2026.05 기준 ◂</div>
     <div class="stats-grid">
       <div class="stat-box">
         <div class="stat-num">400+</div>
@@ -1141,7 +1239,7 @@
 </main>
 
 <footer>
-  ATOMERA INC. (NASDAQ: ATOM) · MST® MEARS SILICON TECHNOLOGY · DATA SOURCE: IR REPORTS 2025–2026
+  ATOMERA INC. (NASDAQ: ATOM) · MST® MEARS SILICON TECHNOLOGY · DATA SOURCE: IR REPORTS 2025–2026 · 1Q26 컨콜 반영
 </footer>
 
 <script>
